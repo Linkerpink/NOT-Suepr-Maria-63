@@ -127,6 +127,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1189288791622014703, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2117922853694869623, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
       propertyPath: m_Height
       value: 1.5419049
@@ -142,6 +146,10 @@ PrefabInstance:
     - target: {fileID: 4425625175339898552, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
       propertyPath: jumpForce
       value: 6.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 4425625175339898552, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
+      propertyPath: deceleration
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 4425625175339898552, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
       propertyPath: cameraTransform
@@ -1243,6 +1251,26 @@ PrefabInstance:
     - target: {fileID: 861018877829004161, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
       propertyPath: HorizontalAxis.Value
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598394560569187389, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
+      propertyPath: Damping.x
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598394560569187389, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
+      propertyPath: Damping.y
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598394560569187389, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
+      propertyPath: Lookahead.Time
+      value: 0.308
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598394560569187389, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
+      propertyPath: Lookahead.Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598394560569187389, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
+      propertyPath: Lookahead.Smoothing
+      value: 9.4
       objectReference: {fileID: 0}
     - target: {fileID: 3753742920196742577, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
       propertyPath: m_LocalPosition.x

@@ -31,6 +31,7 @@ public class Mario : MonoBehaviour
 
     private float angle;
     private float targetAngle;
+    private float lastAngle;
 
     private enum States
     {
@@ -46,41 +47,47 @@ public class Mario : MonoBehaviour
     {
         m_rigidbody = GetComponent<Rigidbody>();
         m_gameManager = FindFirstObjectByType<GameManager>();
-        
-        m_rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
     }
 
     private void Start()
     {
-        maxWalkMoveSpeed = maxMoveSpeed / 2;
+        maxWalkMoveSpeed = maxMoveSpeed / 3;
     }
     
     private void Update()
     {
-        // Ground Check
         isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f, groundLayer);
         
-        moveDirection = new Vector3(inputDirection.x, 0, inputDirection.y);
-        
-        targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
-        angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
-        
-        if (moveDirection.magnitude >= 0.5f)
+        if (inputDirection.sqrMagnitude > 0.01f) 
+        {
+            moveDirection = new Vector3(inputDirection.x, 0, inputDirection.y);
+            targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
+            angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+            lastAngle = angle; 
+        }
+        else
+        {
+            moveDirection = Vector3.zero;
+            angle = lastAngle;
+        }
+
+        if (inputDirection.sqrMagnitude >= 0.25f)
         {
             state = States.Run;
         }
-        else if (moveDirection.magnitude >= 0.1f)
+        else if (inputDirection.sqrMagnitude >= 0.01f)
         {
             state = States.Walk;
         }
         else
         {
-            moveSpeed = Mathf.Max(moveSpeed - deceleration * Time.deltaTime, 0);
+            state = States.Idle;
         }
 
         switch (state)
         {
             case States.Idle:
+                moveSpeed = Mathf.Max(moveSpeed - deceleration * Time.deltaTime, 0);
                 break;
             case States.Walk:
                 moveSpeed = Mathf.Min(moveSpeed + acceleration * Time.deltaTime, maxWalkMoveSpeed);
@@ -96,9 +103,11 @@ public class Mario : MonoBehaviour
         
         transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-        moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-        
-        // Apply movement
+        if (moveDirection != Vector3.zero) 
+        {
+            moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+        }
+
         Vector3 velocity = moveDirection.normalized * moveSpeed;
         m_rigidbody.linearVelocity = new Vector3(velocity.x, m_rigidbody.linearVelocity.y, velocity.z);
     }
@@ -133,7 +142,10 @@ public class Mario : MonoBehaviour
             GUI.Label(new Rect(10, 160, 300, 40), "Move Direction: " + moveDirection, m_Style);
             GUI.Label(new Rect(10, 210, 300, 40), "Player State: " + state, m_Style);
             GUI.Label(new Rect(10, 260, 300, 40), "Jump Count: " + jumpCount, m_Style);
-            GUI.Label(new Rect(10, 310, 300, 40), "Jump Timer: " + jumpTimer, m_Style);
+            GUI.Label(new Rect(10, 310, 300, 40), "Jump Timer: " + jumpTimer, m_Style); 
+            GUI.Label(new Rect(10, 360, 300, 40), "Angle: " + angle, m_Style);
+            GUI.Label(new Rect(10, 410, 300, 40), "Target Angle: " + targetAngle, m_Style);
+            GUI.Label(new Rect(10, 460, 300, 40), "Last Angle: " + lastAngle, m_Style);
         }
     }
 }
