@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Unity.Burst.Intrinsics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -20,6 +19,7 @@ public class Mario : MonoBehaviour
     [SerializeField] private float jumpForce = 8f;
     private int jumpCount = 0;
     private float jumpTimer = 0f;
+    [SerializeField] private float jumpTimerDuration = 1f;
     
     [SerializeField] private float turnSmoothTime = 0.1f;
     private float turnSmoothVelocity;
@@ -27,11 +27,14 @@ public class Mario : MonoBehaviour
 
     private Vector3 moveDirection;
     private Vector2 inputDirection;
+    private Vector3 jumpDirection;
     private GameManager m_gameManager;
 
     private float angle;
     private float targetAngle;
     private float lastAngle;
+    
+    private Animator m_animator;
 
     private enum States
     {
@@ -47,6 +50,8 @@ public class Mario : MonoBehaviour
     {
         m_rigidbody = GetComponent<Rigidbody>();
         m_gameManager = FindFirstObjectByType<GameManager>();
+        
+        m_animator = GetComponentInChildren<Animator>();
     }
 
     private void Start()
@@ -63,7 +68,7 @@ public class Mario : MonoBehaviour
             moveDirection = new Vector3(inputDirection.x, 0, inputDirection.y);
             targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
             angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
-            lastAngle = angle; 
+            lastAngle = angle;
         }
         else
         {
@@ -71,33 +76,61 @@ public class Mario : MonoBehaviour
             angle = lastAngle;
         }
 
-        if (inputDirection.sqrMagnitude >= 0.25f)
+        if (state != States.Jump || !isGrounded)
         {
-            state = States.Run;
-        }
-        else if (inputDirection.sqrMagnitude >= 0.01f)
-        {
-            state = States.Walk;
-        }
-        else
-        {
-            state = States.Idle;
+            if (inputDirection.sqrMagnitude >= 0.25f)
+            {
+                state = States.Run;
+            }
+            else if (inputDirection.sqrMagnitude >= 0.01f)
+            {
+                state = States.Walk;
+            }
+            else
+            {
+                state = States.Idle;
+            }    
         }
 
+        if (!isGrounded)
+        {
+            state = States.Jump;
+        }
+        
         switch (state)
         {
             case States.Idle:
                 moveSpeed = Mathf.Max(moveSpeed - deceleration * Time.deltaTime, 0);
+            
                 break;
+            
             case States.Walk:
                 moveSpeed = Mathf.Min(moveSpeed + acceleration * Time.deltaTime, maxWalkMoveSpeed);
+                
                 break;
+            
             case States.Run:
+                
                 moveSpeed = Mathf.Min(moveSpeed + acceleration * Time.deltaTime, maxMoveSpeed);
+                
                 break;
+            
             case States.Jump:
+
+                if (jumpCount < 3)
+                {
+                    jumpTimer = jumpTimerDuration;    
+                }
+                else
+                {
+                    jumpTimer = jumpTimerDuration / 4;
+                }
+                
                 if (isGrounded)
+                {
                     state = States.Idle;
+                }
+                
                 break;
         }
         
@@ -107,9 +140,22 @@ public class Mario : MonoBehaviour
         {
             moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
         }
-
+        
         Vector3 velocity = moveDirection.normalized * moveSpeed;
+        
         m_rigidbody.linearVelocity = new Vector3(velocity.x, m_rigidbody.linearVelocity.y, velocity.z);
+
+        if (jumpTimer > 0 && isGrounded)
+        {
+            jumpTimer -= Time.deltaTime;
+        }
+
+        if (jumpTimer <= 0)
+        {
+            jumpCount = 0;
+        }
+        
+        m_animator.SetInteger("jumpCount", jumpCount);
     }
     
     public void OnMove(InputAction.CallbackContext context)
@@ -119,9 +165,16 @@ public class Mario : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (isGrounded && context.performed)
+        if (isGrounded && context.performed && state != States.Jump)
         {
-            m_rigidbody.linearVelocity = new Vector3(m_rigidbody.linearVelocity.x, jumpForce, m_rigidbody.linearVelocity.z);
+            if (jumpCount < 3)
+            {
+                jumpCount++;                
+            }
+            
+            float _jumpForce = jumpForce + jumpCount;
+            
+            //m_rigidbody.linearVelocity = new Vector3(m_rigidbody.linearVelocity.x, _jumpForce, m_rigidbody.linearVelocity.z);
             state = States.Jump;
         }
     }
@@ -146,6 +199,7 @@ public class Mario : MonoBehaviour
             GUI.Label(new Rect(10, 360, 300, 40), "Angle: " + angle, m_Style);
             GUI.Label(new Rect(10, 410, 300, 40), "Target Angle: " + targetAngle, m_Style);
             GUI.Label(new Rect(10, 460, 300, 40), "Last Angle: " + lastAngle, m_Style);
+            GUI.Label(new Rect(10, 510, 300, 40), "jumpTimer: " + jumpTimer, m_Style);
         }
     }
 }
