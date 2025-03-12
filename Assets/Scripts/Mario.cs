@@ -6,30 +6,43 @@ using UnityEngine.InputSystem;
 
 public class Mario : MonoBehaviour
 {
+    #region Variables
+
+    [SerializeField] private float _gameSpeed;
     private Rigidbody m_rigidbody;
     public Transform cameraTransform;
     public LayerMask groundLayer;
 
+    // Movement
     private float moveSpeed = 0f;
     [SerializeField] private float maxMoveSpeed = 6.0f;
     private float maxWalkMoveSpeed;
     [SerializeField] private float acceleration = 10f;
     [SerializeField] private float deceleration = 15f;
     
+    // Jump
     [SerializeField] private float jumpForce = 8f;
     private int jumpCount = 0;
     private float jumpTimer = 0f;
     [SerializeField] private float jumpTimerDuration = 1f;
     
+    // Ground pound
+    private float groundPoundTimer = 0f;
+    [SerializeField] private float groundPoundTimerDuration = 0.5f;
+    private float groundPoundMoveSpeed = -15f;
+    
     [SerializeField] private float turnSmoothTime = 0.1f;
     private float turnSmoothVelocity;
     private bool isGrounded;
-
+    
+    // Directions
     private Vector3 moveDirection;
     private Vector2 inputDirection;
     private Vector3 jumpDirection;
+    
     private GameManager m_gameManager;
 
+    // Angles
     private float angle;
     private float targetAngle;
     private float lastAngle;
@@ -42,9 +55,15 @@ public class Mario : MonoBehaviour
         Walk,
         Run,
         Jump,
+        Crouch,
+        GroundPound,
+        LongJump,
     }
 
     private States state = States.Idle;
+
+
+    #endregion
     
     private void Awake()
     {
@@ -61,6 +80,8 @@ public class Mario : MonoBehaviour
     
     private void Update()
     {
+        Time.timeScale = _gameSpeed;
+        
         isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f, groundLayer);
         
         if (inputDirection.sqrMagnitude > 0.01f) 
@@ -76,7 +97,7 @@ public class Mario : MonoBehaviour
             angle = lastAngle;
         }
 
-        if (state != States.Jump || !isGrounded)
+        if (state != States.Jump && state != States.GroundPound && state != States.LongJump && state != States.Crouch && isGrounded)
         {
             if (inputDirection.sqrMagnitude >= 0.25f)
             {
@@ -92,7 +113,7 @@ public class Mario : MonoBehaviour
             }    
         }
 
-        if (!isGrounded)
+        if (!isGrounded && state != States.GroundPound && state != States.LongJump)
         {
             state = States.Jump;
         }
@@ -128,9 +149,38 @@ public class Mario : MonoBehaviour
                 
                 if (isGrounded)
                 {
+                    if (jumpCount >= 3)
+                    {
+                        m_animator.SetTrigger("land");
+                    }
                     state = States.Idle;
                 }
                 
+                break;
+            
+            case States.Crouch:
+                Debug.Log("Crouching yay");
+                break;
+            
+            case States.GroundPound:
+                print("fortnier");
+                float _verticalMovement = 0f;
+
+                if (groundPoundTimer <= 0)
+                {
+                    _verticalMovement = groundPoundMoveSpeed;
+                }
+                
+                m_rigidbody.linearVelocity = new Vector3(0, _verticalMovement, 0);
+
+                if (isGrounded)
+                {
+                    state = States.Idle;
+                }
+                
+                break;
+                
+            case States.LongJump:
                 break;
         }
         
@@ -140,16 +190,23 @@ public class Mario : MonoBehaviour
         {
             moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
         }
-        
-        Vector3 velocity = moveDirection.normalized * moveSpeed;
-        
-        m_rigidbody.linearVelocity = new Vector3(velocity.x, m_rigidbody.linearVelocity.y, velocity.z);
+
+        if (state != States.GroundPound)
+        {
+            Vector3 velocity = moveDirection.normalized * moveSpeed;
+            m_rigidbody.linearVelocity = new Vector3(velocity.x, m_rigidbody.linearVelocity.y, velocity.z);
+        }
 
         if (jumpTimer > 0 && isGrounded)
         {
             jumpTimer -= Time.deltaTime;
         }
 
+        if (groundPoundTimer > 0 && state == States.GroundPound)
+        {
+            groundPoundTimer -= Time.deltaTime;
+        }
+        
         if (jumpTimer <= 0)
         {
             jumpCount = 0;
@@ -158,14 +215,14 @@ public class Mario : MonoBehaviour
         m_animator.SetInteger("jumpCount", jumpCount);
     }
     
-    public void OnMove(InputAction.CallbackContext context)
+    public void OnMove(InputAction.CallbackContext _context)
     {
-        inputDirection = context.ReadValue<Vector2>();
+        inputDirection = _context.ReadValue<Vector2>();
     }
 
-    public void OnJump(InputAction.CallbackContext context)
+    public void OnJump(InputAction.CallbackContext _context)
     {
-        if (isGrounded && context.performed && state != States.Jump)
+        if (isGrounded && _context.performed && state != States.Jump)
         {
             if (jumpCount < 3)
             {
@@ -174,8 +231,36 @@ public class Mario : MonoBehaviour
             
             float _jumpForce = jumpForce + jumpCount;
             
-            //m_rigidbody.linearVelocity = new Vector3(m_rigidbody.linearVelocity.x, _jumpForce, m_rigidbody.linearVelocity.z);
+            m_rigidbody.linearVelocity = new Vector3(m_rigidbody.linearVelocity.x, _jumpForce, m_rigidbody.linearVelocity.z);
             state = States.Jump;
+        }
+    }
+
+    public void OnCrouch(InputAction.CallbackContext _context)
+    {
+        if (_context.performed)
+        {
+            print("button pressed");
+            if (isGrounded)
+            {
+                state = States.Crouch;
+                Debug.Log("Crouch");
+            }
+            else if (state != States.GroundPound)
+            {
+                print("groundpiuhd");
+                m_animator.SetTrigger("groundPound");
+                state = States.GroundPound;
+                groundPoundTimer = groundPoundTimerDuration;
+            }
+        }
+
+        if (_context.canceled)
+        {
+            if (state == States.Crouch)
+            {
+                state = States.Idle;    
+            }
         }
     }
     
@@ -200,6 +285,7 @@ public class Mario : MonoBehaviour
             GUI.Label(new Rect(10, 410, 300, 40), "Target Angle: " + targetAngle, m_Style);
             GUI.Label(new Rect(10, 460, 300, 40), "Last Angle: " + lastAngle, m_Style);
             GUI.Label(new Rect(10, 510, 300, 40), "jumpTimer: " + jumpTimer, m_Style);
+            GUI.Label(new Rect(10, 560, 300, 40), "GroundPoundTimer: " + groundPoundTimer, m_Style);
         }
     }
 }
