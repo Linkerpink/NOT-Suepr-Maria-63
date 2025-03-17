@@ -3,15 +3,16 @@ using Unity.Burst.Intrinsics;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 public class Mario : MonoBehaviour
 {
     #region Variables
-
-    [SerializeField] private float _gameSpeed;
+    
     private Rigidbody m_rigidbody;
     public Transform cameraTransform;
     public LayerMask groundLayer;
+    public bool canMove = true;
 
     // Movement
     private float moveSpeed = 0f;
@@ -19,6 +20,7 @@ public class Mario : MonoBehaviour
     private float maxWalkMoveSpeed;
     [SerializeField] private float acceleration = 10f;
     [SerializeField] private float deceleration = 15f;
+    private Vector3 velocity;
     
     // Jump
     [SerializeField] private float jumpForce = 8f;
@@ -37,8 +39,10 @@ public class Mario : MonoBehaviour
     
     // Directions
     private Vector3 moveDirection;
+    private Vector3 bufferedMoveDirection; 
     private Vector2 inputDirection;
     private Vector3 jumpDirection;
+    
     
     private GameManager m_gameManager;
 
@@ -80,8 +84,6 @@ public class Mario : MonoBehaviour
     
     private void Update()
     {
-        Time.timeScale = _gameSpeed;
-        
         isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f, groundLayer);
         
         if (inputDirection.sqrMagnitude > 0.01f) 
@@ -159,11 +161,9 @@ public class Mario : MonoBehaviour
                 break;
             
             case States.Crouch:
-                Debug.Log("Crouching yay");
                 break;
             
             case States.GroundPound:
-                print("fortnier");
                 float _verticalMovement = 0f;
 
                 if (groundPoundTimer <= 0)
@@ -181,6 +181,15 @@ public class Mario : MonoBehaviour
                 break;
                 
             case States.LongJump:
+                
+                float _jumpForce = jumpForce / 2;
+                m_rigidbody.linearVelocity = new Vector3(bufferedMoveDirection.x * 1.5f, _jumpForce, bufferedMoveDirection.z * 1.5f);
+                
+                /*if (isGrounded)
+                {
+                    state = States.Idle;
+                }*/
+                
                 break;
         }
         
@@ -191,9 +200,10 @@ public class Mario : MonoBehaviour
             moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
         }
 
+        velocity = moveDirection.normalized * moveSpeed;
+        
         if (state != States.GroundPound)
         {
-            Vector3 velocity = moveDirection.normalized * moveSpeed;
             m_rigidbody.linearVelocity = new Vector3(velocity.x, m_rigidbody.linearVelocity.y, velocity.z);
         }
 
@@ -222,7 +232,19 @@ public class Mario : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext _context)
     {
-        if (isGrounded && _context.performed && state != States.Jump)
+        // Long jump
+        bufferedMoveDirection = moveDirection;
+        
+        if (_context.performed && state == States.Crouch && moveDirection.sqrMagnitude > 0.05f)
+        {
+            jumpCount = 1;
+            
+            state = States.LongJump;
+            Debug.Log("ja je hoort nu te longjumpen jochie");
+        }
+        
+        // Jump
+        if (isGrounded && _context.performed && state != States.Jump && state != States.LongJump)
         {
             if (jumpCount < 3)
             {
@@ -248,7 +270,6 @@ public class Mario : MonoBehaviour
             }
             else if (state != States.GroundPound)
             {
-                print("groundpiuhd");
                 m_animator.SetTrigger("groundPound");
                 state = States.GroundPound;
                 groundPoundTimer = groundPoundTimerDuration;
