@@ -104,6 +104,7 @@ public class Mario : MonoBehaviour
             if (inputDirection.sqrMagnitude >= 0.25f)
             {
                 state = States.Run;
+                m_animator.SetTrigger("run");
             }
             else if (inputDirection.sqrMagnitude >= 0.01f)
             {
@@ -124,7 +125,7 @@ public class Mario : MonoBehaviour
         {
             case States.Idle:
                 moveSpeed = Mathf.Max(moveSpeed - deceleration * Time.deltaTime, 0);
-            
+                jumpCount = 0;
                 break;
             
             case States.Walk:
@@ -151,10 +152,7 @@ public class Mario : MonoBehaviour
                 
                 if (isGrounded)
                 {
-                    if (jumpCount >= 3)
-                    {
-                        m_animator.SetTrigger("land");
-                    }
+                    m_animator.SetTrigger("land");
                     state = States.Idle;
                 }
                 
@@ -177,6 +175,8 @@ public class Mario : MonoBehaviour
                 {
                     state = States.Idle;
                 }
+
+                jumpCount = 0;
                 
                 break;
                 

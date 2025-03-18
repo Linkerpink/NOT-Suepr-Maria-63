@@ -998,9 +998,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_sceneName: Bob Omb Battlefied
-  m_transitionInAnimation: 
-  m_transitionOutAnimation: 
-  m_transitionDelay: 0
+  m_transitionInAnimation: fadeInBlack
+  m_transitionOutAnimation: fadeOutBlack
+  m_transitionDelay: 0.5
 --- !u!4 &838950426
 Transform:
   m_ObjectHideFlags: 0
@@ -1259,9 +1259,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_sceneName: Peach's Castle Outside Front
-  m_transitionInAnimation: 
-  m_transitionOutAnimation: 
-  m_transitionDelay: 0
+  m_transitionInAnimation: fadeInBlack
+  m_transitionOutAnimation: fadeOutBlack
+  m_transitionDelay: 0.5
 --- !u!4 &1035555969
 Transform:
   m_ObjectHideFlags: 0

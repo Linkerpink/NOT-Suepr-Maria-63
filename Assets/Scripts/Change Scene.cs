@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class ChangeScene : MonoBehaviour
 {
     [SerializeField] private string m_sceneName; // The scene to change to
-    [SerializeField] private string m_transitionInAnimation; // 0 = Fade In White, 1 = Fade Out White, 2 = Fade In Black, 3 = Fade Out Black
+    [SerializeField] private string m_transitionInAnimation;
     [SerializeField] private string m_transitionOutAnimation;
     [SerializeField] private float m_transitionDelay;
     private float m_transitionTimer;

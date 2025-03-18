@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
 
     public bool enableDebug = false;
     private bool lockCursor = true;
-    public int transitionOutAnimation = -1;
+    public string transitionOutAnimation;
 
     private GameObject m_canvas;
     private Animator m_backgroundAnimator;
@@ -54,18 +54,19 @@ public class GameManager : MonoBehaviour
         if (m_canvas != null)
         {
             m_backgroundAnimator = m_canvas.GetComponentInChildren<Animator>();
+            
             if (m_backgroundAnimator != null)
             {
-     //           m_backgroundAnimator.SetTrigger("transition", transitionOutAnimation);
+                m_backgroundAnimator.SetTrigger(transitionOutAnimation);
             }
         }
     }
 
-    public void StartTransitionAnimation(int _animation)
+    public void StartTransitionAnimation(string _animation)
     {
         if (m_backgroundAnimator != null)
         {
-       //     m_backgroundAnimator.SetTrigger("transition", _animation);
+            m_backgroundAnimator.SetTrigger(_animation);
         }
     }
 }

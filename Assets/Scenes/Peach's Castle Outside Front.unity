@@ -709,9 +709,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_sceneName: Cheese Land
-  m_transitionInAnimation: 0
-  m_transitionOutAnimation: 0
-  m_transitionDelay: 0
+  m_transitionInAnimation: fadeInBlack
+  m_transitionOutAnimation: fadeOutBlack
+  m_transitionDelay: 0.5
 --- !u!1 &729092065
 GameObject:
   m_ObjectHideFlags: 0
@@ -905,9 +905,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_sceneName: Mario Kart Peach's Castle
-  m_transitionInAnimation: 0
-  m_transitionOutAnimation: 0
-  m_transitionDelay: 0
+  m_transitionInAnimation: fadeInBlack
+  m_transitionOutAnimation: fadeOutBlack
+  m_transitionDelay: 0.5
 --- !u!4 &871891653
 Transform:
   m_ObjectHideFlags: 0
@@ -1081,9 +1081,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_sceneName: Peach's Castle Inside Main Room
-  m_transitionInAnimation: 0
-  m_transitionOutAnimation: 2
-  m_transitionDelay: 3
+  m_transitionInAnimation: fadeInBlack
+  m_transitionOutAnimation: fadeOutBlack
+  m_transitionDelay: 0.5
 --- !u!4 &1035555969
 Transform:
   m_ObjectHideFlags: 0
@@ -1272,9 +1272,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_sceneName: Mario Kart Peach's Castle
-  m_transitionInAnimation: 0
-  m_transitionOutAnimation: 0
-  m_transitionDelay: 0
+  m_transitionInAnimation: fadeInBlack
+  m_transitionOutAnimation: fadeOutBlack
+  m_transitionDelay: 0.5
 --- !u!4 &1511302364
 Transform:
   m_ObjectHideFlags: 0
