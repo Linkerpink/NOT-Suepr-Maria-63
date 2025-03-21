@@ -34,6 +34,11 @@ public class GameManager : MonoBehaviour
             enableDebug = !enableDebug;
         }
 
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+        
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             lockCursor = false;
