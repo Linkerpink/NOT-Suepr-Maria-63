@@ -18,6 +18,8 @@ public class Mario : MonoBehaviour
     // Movement
     private float moveSpeed = 0f;
     [SerializeField] private float maxMoveSpeed = 6.0f;
+    [SerializeField] private float maxCrouchMoveSpeed = 1.5f;
+    private bool isCrouching = false;
     private float maxWalkMoveSpeed;
     [SerializeField] private float acceleration = 10f;
     [SerializeField] private float deceleration = 15f;
@@ -27,7 +29,7 @@ public class Mario : MonoBehaviour
     [SerializeField] private float jumpForce = 8f;
     private int jumpCount = 0;
     private float jumpTimer = 0f;
-    [SerializeField] private float jumpTimerDuration = 1f;
+    [SerializeField] private float jumpTimerDuration = 0.5f;
     
     // Ground pound
     private float groundPoundTimer = 0f;
@@ -43,7 +45,7 @@ public class Mario : MonoBehaviour
     
     // Sliding
     private float diveSlideTimer = 0f;
-    private float diveSlideTimerDuration = 2.5f;
+    [SerializeField] private float diveSlideTimerDuration = 2.5f;
     
     [SerializeField] private float turnSmoothTime = 0.1f;
     private float turnSmoothVelocity;
@@ -71,12 +73,14 @@ public class Mario : MonoBehaviour
         Run,
         Jump,
         Crouch,
+        CrouchWalk,
         GroundPound,
         LongJump,
         Punch,
         Kick,
         Dive,
         DiveSlide,
+        HighJump,
     }
 
     private States state = States.Idle;
@@ -111,22 +115,46 @@ public class Mario : MonoBehaviour
             moveDirection = Vector3.zero;
             angle = lastAngle;
         }
-
-        if (canMove && state != States.Jump && state != States.GroundPound && state != States.LongJump && state != States.Crouch && isGrounded && state != States.GroundPound && state != States.Dive && state != States.Punch && state != States.Kick && state != States.DiveSlide)
+        
+        // Set stickMovement for the Animator
+        m_animator.SetFloat("stickMovement", moveDirection.sqrMagnitude);
+        
+        // Decide what state to switch to
+        if (canMove && state != States.Jump && state != States.GroundPound && state != States.LongJump && isGrounded && state != States.GroundPound && state != States.Dive && state != States.Punch && state != States.Kick && state != States.DiveSlide)
         {
-            if (inputDirection.sqrMagnitude >= 0.25f)
+            if (!isCrouching)
             {
-                state = States.Run;
-                m_animator.SetTrigger("run");
+                // If not crouching
+                
+                if (inputDirection.sqrMagnitude >= 0.25f)
+                {
+                    state = States.Run;
+                    m_animator.SetTrigger("run");
+                }
+                else if (inputDirection.sqrMagnitude >= 0.01f)
+                {
+                    state = States.Walk;
+                }
+                else if (state != States.Kick && state != States.Punch)
+                {
+                    state = States.Idle;
+                }
             }
-            else if (inputDirection.sqrMagnitude >= 0.01f)
+            else
             {
-                state = States.Walk;
+                // If crouching
+                
+                if (inputDirection.sqrMagnitude >= stickDeadZone)
+                {
+                    state = States.CrouchWalk;
+                    
+                }
+                else if (state != States.Kick && state != States.Punch)
+                {
+                    state = States.Crouch;
+                    m_animator.SetTrigger("crouch");
+                }
             }
-            else if (state != States.Kick && state != States.Punch)
-            {
-                state = States.Idle;
-            }    
         }
 
         if (!isGrounded && state != States.GroundPound && state != States.LongJump && state != States.Dive && state != States.Punch && state != States.Kick)
@@ -157,14 +185,7 @@ public class Mario : MonoBehaviour
             
             // Jump
             case States.Jump:
-                if (jumpCount < 3)
-                {
-                    jumpTimer = jumpTimerDuration;    
-                }
-                else
-                {
-                    jumpTimer = jumpTimerDuration / 4;
-                }
+                jumpTimer = jumpTimerDuration;    
                 
                 if (isGrounded)
                 {
@@ -175,6 +196,13 @@ public class Mario : MonoBehaviour
             
             // Crouch
             case States.Crouch:
+                moveSpeed = Mathf.Min(moveSpeed + acceleration * Time.deltaTime, maxCrouchMoveSpeed);
+                break;
+            
+            // CrouchWalk
+            case States.CrouchWalk:
+                moveSpeed = Mathf.Min(moveSpeed + acceleration * Time.deltaTime, maxCrouchMoveSpeed);
+                m_animator.SetTrigger("crouchWalk");
                 break;
             
             // GroundPound
@@ -199,6 +227,15 @@ public class Mario : MonoBehaviour
             case States.LongJump:
                 float _jumpForce = jumpForce / 2;
                 m_rigidbody.linearVelocity = new Vector3(bufferedMoveDirection.x * 1.5f, _jumpForce, bufferedMoveDirection.z * 1.5f);
+                break;
+            
+            // HighJump
+            case States.HighJump:
+                if (isGrounded)
+                {
+                    m_animator.SetTrigger("land");
+                    state = States.Idle;
+                }
                 break;
             
             // DiveSlide
@@ -330,6 +367,18 @@ public class Mario : MonoBehaviour
                 m_rigidbody.linearVelocity = new Vector3(m_rigidbody.linearVelocity.x, _jumpForce, m_rigidbody.linearVelocity.z);
                 state = States.Jump;
             }
+            
+            // High jump
+            if (state == States.Crouch)
+            {
+                m_animator.SetBool("crouch", false);
+                
+                state = States.HighJump;
+                
+                m_rigidbody.linearVelocity = new Vector3(m_rigidbody.linearVelocity.x, jumpForce * 2f, m_rigidbody.linearVelocity.z);
+                
+                m_animator.SetTrigger("highJump");
+            }
 
             if (state == States.DiveSlide && isGrounded)
             {
@@ -343,25 +392,27 @@ public class Mario : MonoBehaviour
     {
         if (_context.performed)
         {
-            print("button pressed");
             if (isGrounded)
             {
-                state = States.Crouch;
-                Debug.Log("Crouch");
+                isGrounded = true;
+                isCrouching = true;
+                m_animator.SetBool("crouch", true);
             }
-            else if (state != States.GroundPound)
+            else if (state != States.GroundPound && !isGrounded)
             {
                 m_animator.SetTrigger("groundPound");
                 state = States.GroundPound;
                 groundPoundTimer = groundPoundTimerDuration;
             }
         }
-
-        if (_context.canceled)
+        
+        if (_context.canceled && isGrounded)
         {
             if (state == States.Crouch)
             {
-                state = States.Idle;    
+                isCrouching = false;
+                
+                m_animator.SetBool("crouch", false);
             }
         }
     }
@@ -424,6 +475,7 @@ public class Mario : MonoBehaviour
             GUI.Label(new Rect(10, 560, 300, 40), "GroundPoundTimer: " + groundPoundTimer, m_Style);
             GUI.Label(new Rect(10, 610, 300, 40), "canMove: " + canMove, m_Style);
             GUI.Label(new Rect(10, 660, 300, 40), "attackCount: " + attackCount, m_Style);
+            GUI.Label(new Rect(10, 710, 300, 40), "isCrouching: " + isCrouching, m_Style);
         }
     }
 }
