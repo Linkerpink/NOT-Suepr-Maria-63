@@ -36,6 +36,10 @@ public class Mario : MonoBehaviour
     [SerializeField] private float groundPoundTimerDuration = 0.5f;
     private float groundPoundMoveSpeed = -15f;
     
+    // Long Jump
+    private float longJumpTimer = 0f;
+    private float longJumpTimerDuration = 0.75f;
+    
     // Attacks
     private int attackCount = 0;
     private float attackTimer = 0f;
@@ -45,7 +49,7 @@ public class Mario : MonoBehaviour
     
     // Sliding
     private float diveSlideTimer = 0f;
-    [SerializeField] private float diveSlideTimerDuration = 2.5f;
+    [SerializeField] private float diveSlideTimerDuration = 0.5f;
     
     [SerializeField] private float turnSmoothTime = 0.1f;
     private float turnSmoothVelocity;
@@ -116,8 +120,9 @@ public class Mario : MonoBehaviour
             angle = lastAngle;
         }
         
-        // Set stickMovement for the Animator
+        // Set values for the Animator
         m_animator.SetFloat("stickMovement", moveDirection.sqrMagnitude);
+        m_animator.SetBool("isGrounded", isGrounded);
         
         // Decide what state to switch to
         if (canMove && state != States.Jump && state != States.GroundPound && state != States.LongJump && isGrounded && state != States.GroundPound && state != States.Dive && state != States.Punch && state != States.Kick && state != States.DiveSlide)
@@ -138,7 +143,10 @@ public class Mario : MonoBehaviour
                 else if (state != States.Kick && state != States.Punch)
                 {
                     state = States.Idle;
+                    m_animator.SetTrigger("land");
                 }
+                
+                m_animator.SetBool("crouch", false);
             }
             else
             {
@@ -152,7 +160,7 @@ public class Mario : MonoBehaviour
                 else if (state != States.Kick && state != States.Punch)
                 {
                     state = States.Crouch;
-                    m_animator.SetTrigger("crouch");
+                    m_animator.SetBool("crouch", true);
                 }
             }
         }
@@ -171,16 +179,20 @@ public class Mario : MonoBehaviour
             case States.Idle:
                 moveSpeed = Mathf.Max(moveSpeed - deceleration * Time.deltaTime, 0);
                 jumpCount = 0;
+                isCrouching = false;
+                m_animator.SetTrigger("land");
                 break;
             
             // Walk
             case States.Walk:
                 moveSpeed = Mathf.Min(moveSpeed + acceleration * Time.deltaTime, maxWalkMoveSpeed);
+                isCrouching = false;
                 break;
             
             // Run
             case States.Run:
                 moveSpeed = Mathf.Min(moveSpeed + acceleration * Time.deltaTime, maxMoveSpeed);
+                isCrouching = false;
                 break;
             
             // Jump
@@ -192,17 +204,20 @@ public class Mario : MonoBehaviour
                     m_animator.SetTrigger("land");
                     state = States.Idle;
                 }
+                
+                isCrouching = false;
                 break;
             
             // Crouch
             case States.Crouch:
                 moveSpeed = Mathf.Min(moveSpeed + acceleration * Time.deltaTime, maxCrouchMoveSpeed);
+                isCrouching = true;
                 break;
             
             // CrouchWalk
             case States.CrouchWalk:
                 moveSpeed = Mathf.Min(moveSpeed + acceleration * Time.deltaTime, maxCrouchMoveSpeed);
-                m_animator.SetTrigger("crouchWalk");
+                isCrouching = true;
                 break;
             
             // GroundPound
@@ -219,14 +234,41 @@ public class Mario : MonoBehaviour
                 if (isGrounded)
                 {
                     state = States.Idle;
+                    m_animator.SetTrigger("land");
                 }
                 jumpCount = 0;
+                isCrouching = false;
                 break;
                 
             // LongJump
             case States.LongJump:
-                float _jumpForce = jumpForce / 2;
-                m_rigidbody.linearVelocity = new Vector3(bufferedMoveDirection.x * 1.5f, _jumpForce, bufferedMoveDirection.z * 1.5f);
+                isCrouching = false;
+                m_animator.SetTrigger("longJump");
+                
+                if (longJumpTimer < longJumpTimerDuration / 2)
+                {
+                    longJumpTimer += Time.deltaTime;
+                    
+                    float _jumpForce = jumpForce / 1.5f;
+                    float _jumpSpeed = moveSpeed * 6;
+                    m_rigidbody.linearVelocity = new Vector3(bufferedMoveDirection.x * _jumpSpeed, _jumpForce, bufferedMoveDirection.z * _jumpSpeed);
+                }
+                else if (longJumpTimer < longJumpTimerDuration)
+                {
+                    longJumpTimer += Time.deltaTime;
+                    float _jumpForce = 0f;
+                    float _jumpSpeed = moveSpeed * 6;
+                    m_rigidbody.linearVelocity = new Vector3(bufferedMoveDirection.x * _jumpSpeed, _jumpForce, bufferedMoveDirection.z * _jumpSpeed);
+                }
+                else
+                {
+                    if (isGrounded)
+                    {
+                        state = States.Idle;
+                        longJumpTimer = 0;
+                        m_animator.SetTrigger("land");
+                    }
+                }
                 break;
             
             // HighJump
@@ -236,6 +278,8 @@ public class Mario : MonoBehaviour
                     m_animator.SetTrigger("land");
                     state = States.Idle;
                 }
+                
+                isCrouching = false;
                 break;
             
             // DiveSlide
@@ -245,7 +289,9 @@ public class Mario : MonoBehaviour
                 if (diveSlideTimer <= 0)
                 {
                     state = States.Idle;
+                    m_animator.SetTrigger("land");
                 }
+                isCrouching = false;
                 break;
             
             //////////Attacks//////////////
@@ -257,6 +303,7 @@ public class Mario : MonoBehaviour
                     state = States.Idle;
                 }
                 moveDirection = Vector3.zero;
+                isCrouching = false;
                 break;
             
             // Kick
@@ -266,6 +313,7 @@ public class Mario : MonoBehaviour
                     state = States.Idle;
                 }
                 moveDirection = Vector3.zero;
+                isCrouching = false;
                 break;
             
             // Dive
@@ -276,18 +324,23 @@ public class Mario : MonoBehaviour
                     diveSlideTimer = diveSlideTimerDuration;
                 }
                 jumpCount = 0;
+                isCrouching = false;
                 break;
         }
         
         // Set movement and rotations
-        transform.rotation = Quaternion.Euler(0f, angle, 0f);
-        if (moveDirection != Vector3.zero) 
+        if (state != States.GroundPound && state != States.LongJump && state != States.Dive)
+        {
+            transform.rotation = Quaternion.Euler(0f, angle, 0f);    
+        }
+        
+        if (moveDirection != Vector3.zero)
         {
             moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
         }
 
         velocity = moveDirection.normalized * moveSpeed;
-        if (state != States.GroundPound)
+        if (state != States.GroundPound && state != States.LongJump && state != States.Dive && state != States.DiveSlide)
         {
             m_rigidbody.linearVelocity = new Vector3(velocity.x, m_rigidbody.linearVelocity.y, velocity.z);
         }
@@ -342,13 +395,15 @@ public class Mario : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext _context)
     {
-
         if (_context.performed)
         {
             // Long jump
-            bufferedMoveDirection = moveDirection;
-        
-            if (state == States.Crouch && moveDirection.sqrMagnitude > stickDeadZone)
+            if (state != States.LongJump && state != States.Dive)
+            {
+                bufferedMoveDirection = moveDirection;    
+            }
+            
+            if (state == States.CrouchWalk && moveDirection.sqrMagnitude > stickDeadZone)
             {
                 jumpCount = 1;
             
@@ -406,14 +461,10 @@ public class Mario : MonoBehaviour
             }
         }
         
-        if (_context.canceled && isGrounded)
+        if (_context.canceled && state == States.Crouch || _context.canceled && state == States.CrouchWalk)
         {
-            if (state == States.Crouch)
-            {
-                isCrouching = false;
-                
-                m_animator.SetBool("crouch", false);
-            }
+            isCrouching = false;
+            m_animator.SetBool("crouch", false);
         }
     }
 
@@ -440,13 +491,12 @@ public class Mario : MonoBehaviour
                 attackComboTimer = attackComboTimerDuration;
             } 
             
-            if (state != States.Dive && moveDirection.sqrMagnitude > stickDeadZone)
+            if (state != States.Dive && state != States.DiveSlide && moveDirection.sqrMagnitude > stickDeadZone && state != States.LongJump)
             {
                 //Dive
                 state = States.Dive;
                 m_animator.SetTrigger("dive");
-                bufferedMoveDirection = moveDirection;
-                m_rigidbody.linearVelocity = new Vector3(m_rigidbody.linearVelocity.x, m_rigidbody.linearVelocity.y, m_rigidbody.linearVelocity.z * 1.5f);
+                m_rigidbody.linearVelocity = new Vector3(m_rigidbody.linearVelocity.x * 1.5f, m_rigidbody.linearVelocity.y, m_rigidbody.linearVelocity.z * 1.5f);
             }
         }
     }
@@ -476,6 +526,8 @@ public class Mario : MonoBehaviour
             GUI.Label(new Rect(10, 610, 300, 40), "canMove: " + canMove, m_Style);
             GUI.Label(new Rect(10, 660, 300, 40), "attackCount: " + attackCount, m_Style);
             GUI.Label(new Rect(10, 710, 300, 40), "isCrouching: " + isCrouching, m_Style);
+            GUI.Label(new Rect(10, 760, 300, 40), "longJumpTimer: " + longJumpTimer, m_Style);
+            GUI.Label(new Rect(10, 810, 300, 40), "bufferedMoveDirection: " + bufferedMoveDirection, m_Style);
         }
     }
 }
