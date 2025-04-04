@@ -9,6 +9,7 @@ TagManager:
   - Player Damage Hitbox
   - Player Deal Damage Hitbox
   - Jump Hitbox
+  - Coin
   layers:
   - Default
   - TransparentFX

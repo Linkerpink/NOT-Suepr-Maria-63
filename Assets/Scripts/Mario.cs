@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEditor;
 using UnityEngine;
@@ -578,7 +579,10 @@ public class Mario : MonoBehaviour
 
     public void Heal(int _healAmount)
     {
-        hp += _healAmount;
+        if (hp < 8)
+        {
+            hp += _healAmount;    
+        }
         
         // Power Meter
         if (m_powerMeter.showing && hp >= 8)
