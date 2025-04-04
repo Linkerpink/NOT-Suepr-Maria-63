@@ -1,9 +1,9 @@
-using System.Collections.Generic;
-using Unity.Burst.Intrinsics;
+using System.Collections;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
 
 public class Mario : MonoBehaviour
 {
@@ -14,6 +14,8 @@ public class Mario : MonoBehaviour
     public LayerMask groundLayer;
     public bool canMove = true;
     [SerializeField] private float stickDeadZone = 0.5f;
+    
+    private GameObject m_marioVisual;
 
     // Movement
     private float moveSpeed = 0f;
@@ -30,6 +32,7 @@ public class Mario : MonoBehaviour
     private int jumpCount = 0;
     private float jumpTimer = 0f;
     [SerializeField] private float jumpTimerDuration = 0.5f;
+    [SerializeField] private float groundedRayCastLength = 0.5f;
     
     // Ground pound
     private float groundPoundTimer = 0f;
@@ -69,8 +72,21 @@ public class Mario : MonoBehaviour
     private float lastAngle;
     
     private Animator m_animator;
+    
+    // Health & Enemy stuff
+    public int hp = 8;
+    private bool isOnEnemy;
+    public LayerMask enemyLayer;
+    private float iFrameTimer; // iFrame: Invincible Frames
+    private float iFrameDuration = 1f;
+    private float knockBack = 5f;
+    private PowerMeter m_powerMeter;
+    
+    private float blinkTimer = 0f;
+    [SerializeField] private float blinkTimerDuration = 0.1f;
+    private bool m_showModel = true;
 
-    private enum States
+    public enum States
     {
         Idle,
         Walk,
@@ -87,7 +103,7 @@ public class Mario : MonoBehaviour
         HighJump,
     }
 
-    private States state = States.Idle;
+    public States state = States.Idle;
 
     #endregion
     
@@ -96,6 +112,8 @@ public class Mario : MonoBehaviour
         m_rigidbody = GetComponent<Rigidbody>();
         m_gameManager = FindFirstObjectByType<GameManager>();
         m_animator = GetComponentInChildren<Animator>();
+        m_marioVisual = m_animator.gameObject;
+        m_powerMeter = FindAnyObjectByType<PowerMeter>();
     }
 
     private void Start()
@@ -105,7 +123,9 @@ public class Mario : MonoBehaviour
     
     private void Update()
     {
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f, groundLayer);
+        isGrounded = Physics.Raycast(transform.position, Vector3.down, groundedRayCastLength, groundLayer);
+        isOnEnemy = Physics.Raycast(transform.position, Vector3.down, groundedRayCastLength, enemyLayer);
+        
         
         if (inputDirection.sqrMagnitude > 0.01f && state != States.DiveSlide) 
         {
@@ -134,7 +154,6 @@ public class Mario : MonoBehaviour
                 if (inputDirection.sqrMagnitude >= 0.25f)
                 {
                     state = States.Run;
-                    m_animator.SetTrigger("run");
                 }
                 else if (inputDirection.sqrMagnitude >= 0.01f)
                 {
@@ -143,7 +162,7 @@ public class Mario : MonoBehaviour
                 else if (state != States.Kick && state != States.Punch)
                 {
                     state = States.Idle;
-                    m_animator.SetTrigger("land");
+                    //m_animator.SetTrigger("land");
                 }
                 
                 m_animator.SetBool("crouch", false);
@@ -180,7 +199,6 @@ public class Mario : MonoBehaviour
                 moveSpeed = Mathf.Max(moveSpeed - deceleration * Time.deltaTime, 0);
                 jumpCount = 0;
                 isCrouching = false;
-                m_animator.SetTrigger("land");
                 break;
             
             // Walk
@@ -197,7 +215,7 @@ public class Mario : MonoBehaviour
             
             // Jump
             case States.Jump:
-                jumpTimer = jumpTimerDuration;    
+                jumpTimer = jumpTimerDuration;
                 
                 if (isGrounded)
                 {
@@ -378,11 +396,42 @@ public class Mario : MonoBehaviour
         if (attackCount > 3)
         {
             attackCount = 0;
+            m_animator.SetTrigger("land");
         }
 
         if (diveSlideTimer > 0)
         {
             diveSlideTimer -= Time.deltaTime;
+        }
+        
+        // Iframes
+        if (iFrameTimer > 0)
+        {
+            iFrameTimer -= Time.deltaTime;
+
+            if (blinkTimer <= 0)
+            {
+                blinkTimer = blinkTimerDuration;
+                m_showModel = !m_showModel;
+            }
+
+            if (blinkTimer > 0)
+            {
+                blinkTimer -= Time.deltaTime;
+            }
+        }
+        else
+        {
+            m_showModel = true;
+        }
+
+        if (m_showModel)
+        {
+            m_marioVisual.SetActive(true);
+        }
+        else
+        {
+            m_marioVisual.SetActive(false);
         }
         
         m_animator.SetInteger("jumpCount", jumpCount);
@@ -472,11 +521,10 @@ public class Mario : MonoBehaviour
     {
         if (_context.performed)
         {
-            attackCount++;
-            
             if (attackCount <= 2 && isGrounded && attackTimer <= 0 && moveDirection.sqrMagnitude < stickDeadZone)
             {
                 // Punch
+                attackCount++;
                 state = States.Punch;
                 m_animator.SetTrigger("punch");
                 attackTimer = attackTimerDuration;
@@ -485,18 +533,74 @@ public class Mario : MonoBehaviour
             else if (state != States.Run && attackTimer <= 0 && moveDirection.sqrMagnitude < stickDeadZone)
             {
                 // Kick
+                attackCount++;
                 state = States.Kick;
                 m_animator.SetTrigger("kick");
                 attackTimer = attackTimerDuration;
                 attackComboTimer = attackComboTimerDuration;
-            } 
+            }
             
-            if (state != States.Dive && state != States.DiveSlide && moveDirection.sqrMagnitude > stickDeadZone && state != States.LongJump)
+            if (state != States.Dive && state != States.DiveSlide && moveDirection.sqrMagnitude > stickDeadZone && state != States.LongJump && !isGrounded)
             {
                 //Dive
+                attackCount++;
                 state = States.Dive;
                 m_animator.SetTrigger("dive");
                 m_rigidbody.linearVelocity = new Vector3(m_rigidbody.linearVelocity.x * 1.5f, m_rigidbody.linearVelocity.y, m_rigidbody.linearVelocity.z * 1.5f);
+            }
+        }
+    }
+
+    public void TakeDamage(int _damageAmount)
+    {
+        if (!isOnEnemy && state != States.Punch && state != States.Kick && state != States.Dive && iFrameTimer <= 0)
+        {
+            hp -= _damageAmount;
+            if (hp <= 0)
+            {
+                Die();
+            }
+
+            iFrameTimer = iFrameDuration;
+            
+            // Power Meter
+            if (!m_powerMeter.showing)
+            {
+                print("show power meter");
+                m_powerMeter.ShowPowerMeter();
+            }
+            else
+            {
+                print("skill issueee");
+            }
+        }
+    }
+
+    public void Heal(int _healAmount)
+    {
+        hp += _healAmount;
+        
+        // Power Meter
+        if (m_powerMeter.showing && hp >= 8)
+        {
+            print("hide power meter");
+            m_powerMeter.HidePowerMeter();
+        }
+    }
+    
+    private void Die()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Jump Hitbox"))
+        {
+            if (isOnEnemy)
+            {
+                other.GetComponentInParent<Enemy>().TakeDamage(1);
+                m_rigidbody.AddForce(0f,10f,0f,ForceMode.Impulse);
             }
         }
     }
@@ -507,6 +611,12 @@ public class Mario : MonoBehaviour
         {
             fontSize = 48,
             normal = { textColor = Color.white }
+        };
+        
+        GUIStyle m_greenText = new GUIStyle
+        {
+            fontSize = 48,
+            normal = { textColor = Color.green }
         };
 
         if (m_gameManager.enableDebug)
@@ -528,6 +638,10 @@ public class Mario : MonoBehaviour
             GUI.Label(new Rect(10, 710, 300, 40), "isCrouching: " + isCrouching, m_Style);
             GUI.Label(new Rect(10, 760, 300, 40), "longJumpTimer: " + longJumpTimer, m_Style);
             GUI.Label(new Rect(10, 810, 300, 40), "bufferedMoveDirection: " + bufferedMoveDirection, m_Style);
+            GUI.Label(new Rect(10, 860, 300, 40), "HP: " + hp, m_greenText);
+            GUI.Label(new Rect(10, 910, 300, 40), "iFrameTimer: " + iFrameTimer, m_greenText);
+            //GUI.Label(new Rect(10, 960, 300, 40), "attackTimer: " + attackTimer, m_Style);
+            GUI.Label(new Rect(10, 960, 300, 40), "power meter showing: " + m_powerMeter.showing, m_Style);
         }
     }
 }

@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 3
   tags:
   - Damage
+  - Enemy
+  - Player Damage Hitbox
+  - Player Deal Damage Hitbox
+  - Jump Hitbox
   layers:
   - Default
   - TransparentFX
@@ -14,8 +18,8 @@ TagManager:
   - UI
   - gay
   - Player
-  - 
-  - 
+  - Player Damage Hitbox
+  - Enemy
   - 
   - 
   - 
