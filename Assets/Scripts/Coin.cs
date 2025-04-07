@@ -13,6 +13,8 @@ public class Coin : MonoBehaviour
             {
                 m_mario.Heal(1);
             }
+            
+            gameObject.SetActive(false);
         }
     }
 }
