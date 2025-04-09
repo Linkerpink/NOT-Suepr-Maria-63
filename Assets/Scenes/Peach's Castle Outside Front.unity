@@ -1062,6 +1062,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Game Manager
       objectReference: {fileID: 0}
+    - target: {fileID: 5172712965198014286, guid: 1b1610ee4c0ba05439a8471acc4cb1d2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1119,8 +1123,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_sceneName: Peach's Castle Inside Main Room
-  m_transitionInAnimation: fadeInBlack
-  m_transitionOutAnimation: fadeOutBlack
+  m_transitionInAnimation: fadeInWhite
+  m_transitionOutAnimation: fadeOutWhite
   m_transitionDelay: 0.5
 --- !u!4 &1035555969
 Transform:

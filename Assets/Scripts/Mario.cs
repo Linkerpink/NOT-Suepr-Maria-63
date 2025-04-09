@@ -488,7 +488,7 @@ public class Mario : MonoBehaviour
             if (state == States.DiveSlide && isGrounded)
             {
                 state = States.Idle;
-                m_animator.SetTrigger("landed");
+                m_animator.SetTrigger("land");
             }
         }
     }
@@ -592,9 +592,9 @@ public class Mario : MonoBehaviour
         }
     }
     
-    private void Die()
+    public void Die()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadScene("Peach's Castle Inside Main Room");
     }
 
     private void OnTriggerEnter(Collider other)
@@ -605,6 +605,14 @@ public class Mario : MonoBehaviour
             {
                 other.GetComponentInParent<Enemy>().TakeDamage(1);
                 m_rigidbody.AddForce(0f,10f,0f,ForceMode.Impulse);
+            }
+        }
+
+        if (other.CompareTag("King Bob Omb"))
+        {
+            if (state == States.Dive || state == States.Punch || state == States.Kick)
+            {
+                
             }
         }
     }
