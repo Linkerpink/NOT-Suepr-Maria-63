@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
@@ -22,10 +23,13 @@ public class GameManager : MonoBehaviour
     public List<Star> starsCollected;
     private GameObject m_starSelect;
     private GameObject m_starObjects;
+    [SerializeField] private GameObject m_starPrefab;
     
     [SerializeField] private TextMeshProUGUI m_starText;
     
     private Mario m_mario;
+    
+    private PlayerInput m_playerInput;
     
     private void Awake()
     {
@@ -39,6 +43,8 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         SceneManager.sceneLoaded += OnSceneLoaded;
+        
+        m_playerInput = GetComponent<PlayerInput>();
     }
 
     private void Update()
@@ -68,6 +74,20 @@ public class GameManager : MonoBehaviour
         }
 
         Cursor.lockState = lockCursor ? CursorLockMode.Locked : CursorLockMode.None;
+
+        if (m_mario == null)
+        {
+            if (m_mario.canMove)
+            {
+                m_playerInput.actions.FindActionMap("Player").Enable();
+                m_playerInput.actions.FindActionMap("UI").Disable();
+            }
+            else
+            {
+                m_playerInput.actions.FindActionMap("Player").Enable();
+                m_playerInput.actions.FindActionMap("UI").Disable();
+            }
+        }
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -84,8 +104,8 @@ public class GameManager : MonoBehaviour
                     StartTransitionAnimation("fadeOutWhite");
                 }
             }
-                
-            m_starText = m_canvas.GetComponentInChildren<TextMeshProUGUI>();
+
+            SetStarText();
         }
         
         m_starSelect = GameObject.Find("Star Select");
@@ -97,6 +117,11 @@ public class GameManager : MonoBehaviour
         }
         
         m_mario = FindAnyObjectByType<Mario>();
+
+        if (m_mario != null)
+        {
+            m_mario.canMove = false;
+        }
     }
 
     public void StartTransitionAnimation(string _animation)
@@ -117,6 +142,7 @@ public class GameManager : MonoBehaviour
     {
         m_starSelect.SetActive(false);
         m_starObjects.SetActive(true);
+        m_mario.canMove = true;
 
         foreach (Transform _child in m_starObjects.transform)
         {
@@ -168,12 +194,27 @@ public class GameManager : MonoBehaviour
     public void HoverOverStar(Star _star)
     {
         m_canvas = FindAnyObjectByType<Canvas>().gameObject;
-        m_starText = m_canvas.GetComponentInChildren<TextMeshProUGUI>();
+        SetStarText();
         m_starText.SetText(_star.starName);
     }
 
-    public void GetStar()
+    private void SetStarText()
     {
-        //starsCollected.Add();
+        m_starText = GameObject.Find("Star Name Text").GetComponent<TextMeshProUGUI>();
+    }
+
+    public void SpawnStar(Star _star, Transform _transform)
+    {
+        GameObject _starObject = Instantiate(m_starPrefab, _transform);
+    
+        _starObject.GetComponent<StarHolder>().star = _star;
+    }
+    
+    public void GetStar(Star _star)
+    {
+        if (!starsCollected.Contains(_star))
+        {
+            starsCollected.Add(_star);    
+        }
     }
 }

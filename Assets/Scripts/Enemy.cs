@@ -81,15 +81,30 @@ public class Enemy : MonoBehaviour
                 {
                     walkPointSet = false;
                 }
-                agent.speed = patrolSpeed;
+                
+                if (m_mario.canMove)
+                {
+                    agent.speed = patrolSpeed;
+                }
+                else
+                {
+                    agent.speed = 0;
+                }
                 
                 break;
             
             // Carge Player
             case States.ChargePlayer:
                 
-                agent.SetDestination(m_marioTransform.position);
-                agent.speed = runSpeed;
+                if (m_mario.canMove)
+                {
+                    agent.SetDestination(m_marioTransform.position);
+                    agent.speed = runSpeed;    
+                }
+                else
+                {
+                    agent.speed = 0;
+                }
                 
                 break;
         }

@@ -11,6 +11,9 @@ TagManager:
   - Jump Hitbox
   - Coin
   - King Bob Omb
+  - Dialogue Hitbox
+  - Star Name Text
+  - Top Hitbox
   layers:
   - Default
   - TransparentFX

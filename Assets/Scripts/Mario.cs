@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Cinemachine;
 using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEditor;
@@ -13,7 +14,7 @@ public class Mario : MonoBehaviour
     private Rigidbody m_rigidbody;
     public Transform cameraTransform;
     public LayerMask groundLayer;
-    public bool canMove = true;
+    public bool canMove = false;
     [SerializeField] private float stickDeadZone = 0.5f;
     
     private GameObject m_marioVisual;
@@ -106,6 +107,13 @@ public class Mario : MonoBehaviour
 
     public States state = States.Idle;
 
+    // Dialogue
+    private Textbox m_textbox;
+    private bool m_isCollidingWithDialogueHitbox = false;
+    private Collider m_dialogueHitbox;
+    
+    private PlayerInput m_playerInput;
+
     #endregion
     
     private void Awake()
@@ -115,6 +123,10 @@ public class Mario : MonoBehaviour
         m_animator = GetComponentInChildren<Animator>();
         m_marioVisual = m_animator.gameObject;
         m_powerMeter = FindAnyObjectByType<PowerMeter>();
+        
+        m_textbox = FindAnyObjectByType<Textbox>();
+
+        m_playerInput = GetComponent<PlayerInput>();
     }
 
     private void Start()
@@ -128,7 +140,7 @@ public class Mario : MonoBehaviour
         isOnEnemy = Physics.Raycast(transform.position, Vector3.down, groundedRayCastLength, enemyLayer);
         
         
-        if (inputDirection.sqrMagnitude > 0.01f && state != States.DiveSlide) 
+        if (inputDirection.sqrMagnitude > 0.01f && state != States.DiveSlide && canMove) 
         {
             moveDirection = new Vector3(inputDirection.x, 0, inputDirection.y);
             targetAngle = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
@@ -436,6 +448,17 @@ public class Mario : MonoBehaviour
         }
         
         m_animator.SetInteger("jumpCount", jumpCount);
+        
+        if (canMove)
+        {
+            m_playerInput.actions.FindActionMap("Player").Enable();
+            m_playerInput.actions.FindActionMap("UI").Disable();
+        }
+        else
+        {
+            m_playerInput.actions.FindActionMap("Player").Enable();
+            m_playerInput.actions.FindActionMap("UI").Disable();
+        }
     }
     
     public void OnMove(InputAction.CallbackContext _context)
@@ -445,7 +468,7 @@ public class Mario : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext _context)
     {
-        if (_context.performed)
+        if (_context.performed && canMove)
         {
             // Long jump
             if (state != States.LongJump && state != States.Dive)
@@ -522,6 +545,14 @@ public class Mario : MonoBehaviour
     {
         if (_context.performed)
         {
+            // Dialogue
+            if (m_isCollidingWithDialogueHitbox && m_dialogueHitbox != null)
+            {
+                DialogueSequence _dialogueSequence = m_dialogueHitbox.GetComponent<DialogueGiver>().dialogueSequence;
+                m_textbox.StartDialogueSequence(_dialogueSequence);
+            }
+            
+            // Attacking
             if (attackCount <= 2 && isGrounded && attackTimer <= 0 && moveDirection.sqrMagnitude < stickDeadZone)
             {
                 // Punch
@@ -614,6 +645,20 @@ public class Mario : MonoBehaviour
             {
                 
             }
+        }
+        
+        if (other.CompareTag("Dialogue Hitbox"))
+        {
+            m_isCollidingWithDialogueHitbox = true;
+            m_dialogueHitbox = other;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Dialogue Hitbox"))
+        {
+            m_isCollidingWithDialogueHitbox = false;
         }
     }
     

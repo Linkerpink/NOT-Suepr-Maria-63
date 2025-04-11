@@ -22,11 +22,8 @@ public class StarSelectStar : MonoBehaviour
 
     private void Update()
     {
-        print(EventSystem.current.currentSelectedGameObject);
-        
         if (EventSystem.current.currentSelectedGameObject == this.gameObject)
         {
-            print(m_star);
             m_gameManager.HoverOverStar(m_star);
         }
     }
