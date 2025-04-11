@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waypoints: []
+  m_star: {fileID: 0}
 --- !u!195 &4698701061234793278
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -58,7 +59,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 5
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -116,6 +117,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dialogueSequence: {fileID: 11400000, guid: 94496443211201543b83492d8ba579b1, type: 2}
+  m_talkArrow: {fileID: 0}
 --- !u!65 &4826150650968509564
 BoxCollider:
   m_ObjectHideFlags: 0

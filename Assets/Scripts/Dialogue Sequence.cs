@@ -13,6 +13,7 @@ public class DialogueSequence : ScriptableObject
         Nothing,
         KoopaTheQuickStartRace,
         KoopaTheQuickWinRace,
+        KoopaTheQuickLoseRace,
     }
     
     public DialogueTypes dialogueType;
@@ -24,6 +25,16 @@ public class DialogueSequence : ScriptableObject
             case DialogueTypes.KoopaTheQuickStartRace:
                 KoopaTheQuick _koopaTheQuick = FindAnyObjectByType<KoopaTheQuick>();
                 _koopaTheQuick.StartRace();
+                break;
+            
+            case DialogueTypes.KoopaTheQuickWinRace:
+                _koopaTheQuick = FindAnyObjectByType<KoopaTheQuick>();
+                _koopaTheQuick.WinRace();
+                break;
+            
+            case DialogueTypes.KoopaTheQuickLoseRace:
+                Mario _mario = FindAnyObjectByType<Mario>();
+                _mario.Die();
                 break;
         }
     }

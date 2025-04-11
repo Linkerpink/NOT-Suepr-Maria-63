@@ -13,46 +13,38 @@ public class KoopaTheQuick : MonoBehaviour
     
     [SerializeField] private Star m_star;
     private GameManager m_gameManager;
+    private RaceManager m_raceManager;
     
-    private enum States
-    {
-        Idle,
-        Racing,
-    }
+    private bool racing = false;
     
-    private States state = States.Idle;
+    private Textbox m_textbox;
+
+    [SerializeField] private DialogueSequence m_lostDialogue;
+    [SerializeField] private DialogueSequence m_wonDialogue;
     
     private void Awake()
     {
         m_agent = GetComponent<NavMeshAgent>();
         m_animator = GetComponent<Animator>();
+        
+        m_gameManager = FindAnyObjectByType<GameManager>();
+        m_textbox = FindAnyObjectByType<Textbox>();
     }
     
     private void Update()
     {
-        switch (state)
+        print(racing);
+        
+        if (racing)
         {
-            case States.Idle:
-                break;
-            
-            case States.Racing:
+            float _remainingDist = Vector3.Distance(transform.position, waypoints[m_currentWaypoint].position);
                 
-                float _remainingDist = Vector3.Distance(transform.position, waypoints[m_currentWaypoint].position);
-                
-                print(_remainingDist);
-                if (_remainingDist <= 1f  &&  m_currentWaypoint < waypoints.Length - 1)
-                {
-                    m_currentWaypoint++;
-                    SetWaypoint();
-                }
-                
-                /*
-                if (transform.position == waypoints[m_currentWaypoint].position &&)
-                {
-                    print("ka");
-                }
-                */
-                break;
+            if (_remainingDist <= 1f  &&  m_currentWaypoint < waypoints.Length - 1)
+            {
+                m_currentWaypoint++;
+                SetWaypoint();
+            }
+    
         }
         
         print(m_currentWaypoint);
@@ -60,8 +52,10 @@ public class KoopaTheQuick : MonoBehaviour
 
     public void StartRace()
     {
-        state = States.Racing;
-        SetWaypoint();
+        racing = true;
+        SetWaypoint(); 
+        m_raceManager= FindAnyObjectByType<RaceManager>();
+        m_raceManager.StartRace();
     }
 
     private void SetWaypoint()
@@ -72,11 +66,28 @@ public class KoopaTheQuick : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Top Hitbox") && state == States.Racing)
+        if (other.CompareTag("Top Hitbox"))
         {
-            m_gameManager.SpawnStar(m_star, transform);
-            state = States.Idle;
-            gameObject.SetActive(false);
+            if (m_raceManager.raceState == RaceManager.RaceStates.Racing)
+            {
+                m_raceManager.raceState = RaceManager.RaceStates.Lost;
+                
+                m_textbox.StartDialogueSequence(m_lostDialogue);
+            }
+            
+            if (m_raceManager.raceState == RaceManager.RaceStates.Won)
+            {
+                m_textbox.StartDialogueSequence(m_wonDialogue);
+            }
         }
+    }
+
+    public void WinRace()
+    {
+        m_agent.enabled = false;
+        print("race gewonnen :O");
+        m_gameManager.SpawnStar(m_star, new Vector3(transform.position.x, transform.position.y + 2.5f, transform.position.z));
+        racing = false;
+        gameObject.SetActive(false);
     }
 }

@@ -39,9 +39,15 @@ public class ChangeScene : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            m_startTransition = true;
-            m_gameManager.StartTransitionAnimation(m_transitionInAnimation);
-            m_gameManager.transitionOutAnimation = m_transitionOutAnimation;
+            StartTransition();
         }
+    }
+
+    public void StartTransition()
+    {
+        m_startTransition = true;
+        m_gameManager.StartTransitionAnimation(m_transitionInAnimation);
+        m_gameManager.transitionOutAnimation = m_transitionOutAnimation;
+
     }
 }

@@ -113,6 +113,10 @@ public class Mario : MonoBehaviour
     private Collider m_dialogueHitbox;
     
     private PlayerInput m_playerInput;
+    
+    // Stars
+    private bool m_pickedUpStar = false;
+    private bool m_startedVictoryPose = false;
 
     #endregion
     
@@ -230,7 +234,7 @@ public class Mario : MonoBehaviour
             case States.Jump:
                 jumpTimer = jumpTimerDuration;
                 
-                if (isGrounded)
+                if (isGrounded && canMove)
                 {
                     m_animator.SetTrigger("land");
                     state = States.Idle;
@@ -262,7 +266,7 @@ public class Mario : MonoBehaviour
                 
                 m_rigidbody.linearVelocity = new Vector3(0, _verticalMovement, 0);
 
-                if (isGrounded)
+                if (isGrounded && canMove)
                 {
                     state = States.Idle;
                     m_animator.SetTrigger("land");
@@ -293,7 +297,7 @@ public class Mario : MonoBehaviour
                 }
                 else
                 {
-                    if (isGrounded)
+                    if (isGrounded && canMove)
                     {
                         state = States.Idle;
                         longJumpTimer = 0;
@@ -304,7 +308,7 @@ public class Mario : MonoBehaviour
             
             // HighJump
             case States.HighJump:
-                if (isGrounded)
+                if (isGrounded && canMove)
                 {
                     m_animator.SetTrigger("land");
                     state = States.Idle;
@@ -317,7 +321,7 @@ public class Mario : MonoBehaviour
             case States.DiveSlide:
                 moveDirection = new Vector3(bufferedMoveDirection.x, 0, bufferedMoveDirection.z);
                 
-                if (diveSlideTimer <= 0)
+                if (diveSlideTimer <= 0 && canMove)
                 {
                     state = States.Idle;
                     m_animator.SetTrigger("land");
@@ -406,7 +410,7 @@ public class Mario : MonoBehaviour
             attackCount = 0;
         }
 
-        if (attackCount > 3)
+        if (attackCount > 3 && canMove)
         {
             attackCount = 0;
             m_animator.SetTrigger("land");
@@ -459,6 +463,18 @@ public class Mario : MonoBehaviour
             m_playerInput.actions.FindActionMap("Player").Enable();
             m_playerInput.actions.FindActionMap("UI").Disable();
         }
+        
+        // Star stuff
+        if (m_pickedUpStar)
+        {
+            canMove = false;
+
+            if (isGrounded && !m_startedVictoryPose)
+            {
+                m_startedVictoryPose = true;
+                m_animator.SetTrigger("victoryPose");
+            }
+        }
     }
     
     public void OnMove(InputAction.CallbackContext _context)
@@ -508,7 +524,7 @@ public class Mario : MonoBehaviour
                 m_animator.SetTrigger("highJump");
             }
 
-            if (state == States.DiveSlide && isGrounded)
+            if (state == States.DiveSlide && isGrounded && canMove)
             {
                 state = States.Idle;
                 m_animator.SetTrigger("land");
@@ -518,7 +534,7 @@ public class Mario : MonoBehaviour
 
     public void OnCrouch(InputAction.CallbackContext _context)
     {
-        if (_context.performed)
+        if (_context.performed && canMove)
         {
             if (isGrounded)
             {
@@ -543,7 +559,7 @@ public class Mario : MonoBehaviour
 
     public void OnAttack(InputAction.CallbackContext _context)
     {
-        if (_context.performed)
+        if (_context.performed && canMove)
         {
             // Dialogue
             if (m_isCollidingWithDialogueHitbox && m_dialogueHitbox != null)
@@ -643,7 +659,7 @@ public class Mario : MonoBehaviour
         {
             if (state == States.Dive || state == States.Punch || state == States.Kick)
             {
-                
+                // PICK UP KINF BOB OMG
             }
         }
         
@@ -651,6 +667,29 @@ public class Mario : MonoBehaviour
         {
             m_isCollidingWithDialogueHitbox = true;
             m_dialogueHitbox = other;
+        }
+
+        if (other.CompareTag("Star"))
+        {
+            print("should pick up star");
+            m_gameManager.GetStar(other.gameObject.GetComponent<StarHolder>().star);
+            other.gameObject.SetActive(false);
+            m_pickedUpStar = true;
+        }
+
+        if (other.CompareTag("Top Hitbox"))
+        {
+            RaceManager _raceManager = FindObjectOfType<RaceManager>();
+
+            if (_raceManager != null)
+            {
+                _raceManager.EndRace();
+
+                if (_raceManager.raceState == RaceManager.RaceStates.Racing)
+                {
+                    _raceManager.raceState = RaceManager.RaceStates.Won;
+                }    
+            }
         }
     }
 

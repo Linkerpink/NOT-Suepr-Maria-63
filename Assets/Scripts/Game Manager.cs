@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -23,6 +24,7 @@ public class GameManager : MonoBehaviour
     public List<Star> starsCollected;
     private GameObject m_starSelect;
     private GameObject m_starObjects;
+    public Star currentStar;
     [SerializeField] private GameObject m_starPrefab;
     
     [SerializeField] private TextMeshProUGUI m_starText;
@@ -33,19 +35,19 @@ public class GameManager : MonoBehaviour
     
     private void Awake()
     {
-        if (Instance != null)
+        if (Instance != null && Instance != this)
         {
-            Destroy(Instance.gameObject);
+            Destroy(gameObject);
             return;
         }
-
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        SceneManager.sceneLoaded += OnSceneLoaded;
         
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
         m_playerInput = GetComponent<PlayerInput>();
     }
+
 
     private void Update()
     {
@@ -74,23 +76,15 @@ public class GameManager : MonoBehaviour
         }
 
         Cursor.lockState = lockCursor ? CursorLockMode.Locked : CursorLockMode.None;
-
-        if (m_mario == null)
-        {
-            if (m_mario.canMove)
-            {
-                m_playerInput.actions.FindActionMap("Player").Enable();
-                m_playerInput.actions.FindActionMap("UI").Disable();
-            }
-            else
-            {
-                m_playerInput.actions.FindActionMap("Player").Enable();
-                m_playerInput.actions.FindActionMap("UI").Disable();
-            }
-        }
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SetObjects();
+        SetObjectsDelay(0.1f);
+    }
+
+    private void SetObjects()
     {
         m_canvas = GameObject.Find("Canvas");
 
@@ -103,9 +97,12 @@ public class GameManager : MonoBehaviour
                     m_backgroundAnimator = _child.GetComponent<Animator>();
                     StartTransitionAnimation("fadeOutWhite");
                 }
-            }
 
-            SetStarText();
+                if (_child.name == "Star Select")
+                {
+                    SetStarText();
+                }
+            }
         }
         
         m_starSelect = GameObject.Find("Star Select");
@@ -120,8 +117,21 @@ public class GameManager : MonoBehaviour
 
         if (m_mario != null)
         {
-            m_mario.canMove = false;
+            if (m_starSelect != null)
+            {
+                m_mario.canMove = false;   
+            }
+            else
+            {
+                m_mario.canMove = true;    
+            }
         }
+    }
+    
+    IEnumerator SetObjectsDelay(float _delay)
+    {
+        yield return new WaitForSeconds(_delay);
+        SetObjects();
     }
 
     public void StartTransitionAnimation(string _animation)
@@ -134,9 +144,24 @@ public class GameManager : MonoBehaviour
 
     public UnityAction SelectStar(Star _star)
     {
+        if (GameManager.Instance == null)
+        {
+            Debug.LogError("GameManager instance is destroyed!");
+            return null;
+        }
+
+        if (m_starSelect == null || m_starObjects == null)
+        {
+            Debug.LogError("SelectStar: Required objects are not initialized!");
+            return null;
+        }
+
         StartCoroutine(InitializeLevel(_star));
-        return null;    
+        currentStar = _star;
+        return null;
     }
+
+
 
     public IEnumerator<Star> InitializeLevel(Star _star)
     {
@@ -200,21 +225,28 @@ public class GameManager : MonoBehaviour
 
     private void SetStarText()
     {
-        m_starText = GameObject.Find("Star Name Text").GetComponent<TextMeshProUGUI>();
+        GameObject _starText = GameObject.Find("Star Name Text");
+
+        if (_starText != null)
+        {
+            m_starText = GameObject.Find("Star Name Text").GetComponent<TextMeshProUGUI>();    
+        }
     }
 
-    public void SpawnStar(Star _star, Transform _transform)
+    public void SpawnStar(Star _star, Vector3 _position)
     {
-        GameObject _starObject = Instantiate(m_starPrefab, _transform);
+        GameObject _starObject = Instantiate(m_starPrefab, new Vector3(_position.x, _position.y, _position.z), Quaternion.identity);
     
-        _starObject.GetComponent<StarHolder>().star = _star;
+        _starObject.GetComponentInChildren<StarHolder>().star = _star;
     }
     
     public void GetStar(Star _star)
     {
         if (!starsCollected.Contains(_star))
         {
-            starsCollected.Add(_star);    
+            starsCollected.Add(_star);
         }
+        
+        print("starsCollected: " + starsCollected);
     }
 }
