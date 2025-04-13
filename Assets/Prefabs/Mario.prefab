@@ -523,6 +523,7 @@ MonoBehaviour:
     m_Bits: 512
   blinkTimerDuration: 0.05
   state: 0
+  m_kingBobOmbStartBattleDialogueSequence: {fileID: 11400000, guid: 718689c1bf6c78c44a26b1970dc2e43b, type: 2}
 --- !u!114 &7220261871650375313
 MonoBehaviour:
   m_ObjectHideFlags: 0

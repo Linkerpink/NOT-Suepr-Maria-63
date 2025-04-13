@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -36,7 +37,9 @@ public class GameManager : MonoBehaviour
     public bool cannonsOpened = false;
     
     // UI
-    private TextMeshProUGUI m_starsText;
+    [SerializeField] private TextMeshProUGUI m_starsText;
+    
+    private CinemachineBasicMultiChannelPerlin m_perlin;
     
     private void Awake()
     {
@@ -59,6 +62,7 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        print(starsCollected.Count);
         if (Input.GetKeyDown(KeyCode.B))
         {
             enableDebug = !enableDebug;
@@ -81,7 +85,7 @@ public class GameManager : MonoBehaviour
         // UI
         if (m_starsText != null)
         {
-            m_starsText.SetText("X" + starsCollected.Count);
+            SetStarsText();
         }
 
         // Application
@@ -137,6 +141,7 @@ public class GameManager : MonoBehaviour
         }
         
         m_starsText = GameObject.Find("Stars Text").GetComponent<TextMeshProUGUI>();
+        
     }
     
     private IEnumerator SetObjectsWhenReady()
@@ -162,19 +167,13 @@ public class GameManager : MonoBehaviour
         StartCoroutine(InitializeLevel(_star));
         currentStar = _star;
         
-        /*
-        if (GameManager.Instance == null)
+        if (_star.name == "Star 1")
         {
-            Debug.LogError("GameManager instance is destroyed!");
-            return null;
+            m_mario.m_kingBobOmbObject = FindAnyObjectByType<KingBobOmb>().gameObject;
+            m_mario.m_kingBobOmb = m_mario.m_kingBobOmbObject.GetComponent<KingBobOmb>();
         }
 
-        if (m_starSelect == null || m_starObjects == null)
-        {
-            Debug.LogError("SelectStar: Required objects are not initialized!");
-            return null;
-        }
-        */
+        SetStarsText();
         
         return null;
     }
@@ -280,6 +279,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void SetStarsText()
+    {
+        m_starsText = GameObject.Find("Stars Text").GetComponent<TextMeshProUGUI>();
+        
+        if (m_starsText != null)
+        {
+            m_starsText.SetText("X" + starsCollected.Count);
+        }
+    }
+
     public void SpawnStar(Star _star, Vector3 _position)
     {
         GameObject _starObject = Instantiate(m_starPrefab, new Vector3(_position.x, _position.y, _position.z), Quaternion.identity);
@@ -297,5 +306,23 @@ public class GameManager : MonoBehaviour
         currentStar = null;
         
         print("starsCollected: " + starsCollected);
+    }
+
+    public void ScreenShake(float _amplitude, float _frequency, float _duration)
+    {
+        m_perlin = GameObject.Find("Player Camera").GetComponent<CinemachineBasicMultiChannelPerlin>();
+        
+        m_perlin.AmplitudeGain = _amplitude;
+        m_perlin.FrequencyGain = _frequency;
+        StartCoroutine(ShakeTimer(_duration));
+    }
+    
+    private IEnumerator ShakeTimer(float _duration)
+    {
+        yield return new WaitForSeconds(_duration);
+
+        //Reset noise
+        m_perlin.AmplitudeGain = 0;
+        m_perlin.FrequencyGain = 0;
     }
 }

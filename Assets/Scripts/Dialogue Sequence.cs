@@ -12,6 +12,8 @@ public class DialogueSequence : ScriptableObject
     public enum DialogueTypes
     {
         Nothing,
+        KingBobOmbStartFight,
+        KingBobOmbEndFight,
         KoopaTheQuickStartRace,
         KoopaTheQuickWinRace,
         KoopaTheQuickLoseRace,
@@ -21,11 +23,28 @@ public class DialogueSequence : ScriptableObject
     public DialogueTypes dialogueType;
 
     private Mario m_mario;
+    
+    private GameManager m_gameManager;
+
+    private void Awake()
+    {
+        m_gameManager = FindObjectOfType<GameManager>();
+    }
 
     public void EndDialogueFunction()
     {
         switch (dialogueType)
         {
+            case DialogueTypes.KingBobOmbStartFight:
+                KingBobOmb _kingBobOmb = FindAnyObjectByType<KingBobOmb>();
+                _kingBobOmb.StartFight();
+                break;
+            
+            case DialogueTypes.KingBobOmbEndFight:
+                _kingBobOmb = FindAnyObjectByType<KingBobOmb>();
+                _kingBobOmb.EndFight();
+                break;
+            
             case DialogueTypes.KoopaTheQuickStartRace:
                 KoopaTheQuick _koopaTheQuick = FindAnyObjectByType<KoopaTheQuick>();
                 _koopaTheQuick.StartRace();
@@ -43,8 +62,8 @@ public class DialogueSequence : ScriptableObject
             
             case DialogueTypes.PinkBobOmbOpenCannon:
                 // Open Cannons
-                GameManager _gameManager = FindAnyObjectByType<GameManager>();
-                if (!_gameManager.cannonsOpened)
+                m_gameManager = FindAnyObjectByType<GameManager>();
+                if (!m_gameManager.cannonsOpened)
                 {
                     m_mario = FindObjectOfType<Mario>();
                     Animator m_animator = FindAnyObjectByType<BobOmbBattlefieldLevelEvents>().GetComponent<Animator>();

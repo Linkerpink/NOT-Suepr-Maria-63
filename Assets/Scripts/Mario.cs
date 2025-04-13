@@ -109,6 +109,8 @@ public class Mario : MonoBehaviour
 
     public States state = States.Idle;
 
+    [SerializeField] private GameObject heldObject = null;
+
     // Dialogue
     private Textbox m_textbox;
     private bool m_isCollidingWithDialogueHitbox = false;
@@ -119,6 +121,12 @@ public class Mario : MonoBehaviour
     // Stars
     private bool m_pickedUpStar = false;
     private bool m_startedVictoryPose = false;
+    
+    // Bob Omb Battlefield Star 1
+    [SerializeField] private DialogueSequence m_kingBobOmbStartBattleDialogueSequence;
+    private bool isCollidingWithKingBobOmb = false;
+    public GameObject m_kingBobOmbObject;
+    public KingBobOmb m_kingBobOmb;
 
     #endregion
     
@@ -478,6 +486,18 @@ public class Mario : MonoBehaviour
                 m_animator.SetTrigger("victoryPose");
             }
         }
+        
+        // Holding objects
+        if (heldObject != null)
+        {
+            heldObject.transform.position = new Vector3(transform.position.x, transform.position.y + 2, transform.position.z);
+            heldObject.transform.rotation = Quaternion.Euler(0f, angle, 0f);
+
+            if (heldObject.name == "King Bob Omb" && m_kingBobOmb != null)
+            {
+                m_kingBobOmb.state = KingBobOmb.States.Grabbed;
+            }
+        }
     }
     
     public void OnMove(InputAction.CallbackContext _context)
@@ -571,6 +591,26 @@ public class Mario : MonoBehaviour
     {
         if (_context.performed && canMove)
         {
+            // Hold king bob omb
+            if (heldObject == null && isCollidingWithKingBobOmb && m_kingBobOmbObject != null)
+            {
+                heldObject = m_kingBobOmbObject;
+            }
+
+            // Throw object
+            if (heldObject != null)
+            {
+                print("throw object");
+                
+                heldObject.transform.position = new Vector3(heldObject.transform.position.x, transform.position.y + 4, heldObject.transform.position.z) + transform.forward * 4f;
+
+                if (heldObject.name == "King Bob Omb" && m_kingBobOmb != null && m_kingBobOmb.state == KingBobOmb.States.Grabbed)
+                {
+                    m_kingBobOmb.state = KingBobOmb.States.Thrown;
+                    heldObject = null;
+                }
+            }
+            
             // Dialogue
             if (m_isCollidingWithDialogueHitbox && m_dialogueHitbox != null)
             {
@@ -667,10 +707,8 @@ public class Mario : MonoBehaviour
 
         if (other.CompareTag("King Bob Omb"))
         {
-            if (state == States.Dive || state == States.Punch || state == States.Kick)
-            {
-                // PICK UP KINF BOB OMG
-            }
+            isCollidingWithKingBobOmb = true;
+            m_kingBobOmbObject = other.gameObject;
         }
         
         if (other.CompareTag("Dialogue Hitbox"))
@@ -700,6 +738,14 @@ public class Mario : MonoBehaviour
                     _raceManager.raceState = RaceManager.RaceStates.Won;
                 }    
             }
+
+            if (m_gameManager.currentStar.name == "Star 1" && m_kingBobOmb != null)
+            {
+                if (m_kingBobOmb.stage == 0)
+                {
+                    m_textbox.StartDialogueSequence(m_kingBobOmbStartBattleDialogueSequence);    
+                }
+            }
         }
     }
 
@@ -708,6 +754,12 @@ public class Mario : MonoBehaviour
         if (other.CompareTag("Dialogue Hitbox"))
         {
             m_isCollidingWithDialogueHitbox = false;
+        }
+        
+        if (other.CompareTag("King Bob Omb"))
+        {
+            isCollidingWithKingBobOmb = false;
+            m_kingBobOmbObject = null;
         }
     }
 

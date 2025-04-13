@@ -3,7 +3,7 @@ using UnityEngine.AI;
 
 public class KingBobOmb : MonoBehaviour
 {
-    public int stage = 1;
+    public int stage = 0;
 
     public NavMeshAgent agent;
     private Mario m_mario;
@@ -30,6 +30,9 @@ public class KingBobOmb : MonoBehaviour
     private float setWalkPointTimerDuration = 1;
     private float goToWalkTimer;
     private float goToWalkTimerDuration = 2;
+    
+    [SerializeField] private DialogueSequence m_loseDialogueSequence;
+    private Textbox m_textbox;
 
     public enum States
     {
@@ -38,9 +41,12 @@ public class KingBobOmb : MonoBehaviour
         Grabbing,
         Throwing,
         Grabbed,
+        Thrown,
     }
 
-    public States state = States.Walking;
+    public States state = States.Idle;
+
+    [SerializeField] private Star m_kingBobOmbStar;
 
     private void Awake()
     {
@@ -49,6 +55,7 @@ public class KingBobOmb : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         m_animator = GetComponentInChildren<Animator>();
         m_gameManager = FindAnyObjectByType<GameManager>();
+        m_textbox = FindAnyObjectByType<Textbox>();
     }
     
     private void Update()
@@ -69,45 +76,72 @@ public class KingBobOmb : MonoBehaviour
                 break;
                 
             case States.Walking:
-                agent.SetDestination(walkPoint);
-
-                if (setWalkPointTimer > 0)
+                if (stage > 0 && stage < 3)
                 {
-                    setWalkPointTimer -= Time.deltaTime;
+                    agent.SetDestination(walkPoint);
+
+                    if (setWalkPointTimer > 0)
+                    {
+                        setWalkPointTimer -= Time.deltaTime;
+                    }
+                    else
+                    {
+                        SetWalkPoint(m_marioTransform.position);
+                        setWalkPointTimer = setWalkPointTimerDuration;
+                    }
+
+                    if (stage < 2)
+                    {
+                        agent.angularSpeed = 75;
+                    }
+                    else
+                    {
+                        agent.angularSpeed = 180;
+                        setWalkPointTimerDuration = 0.25f;
+                    }    
                 }
                 else
                 {
-                    SetWalkPoint(m_marioTransform.position);
-                    setWalkPointTimer = setWalkPointTimerDuration;
-                }
-
-                if (stage < 2)
-                {
-                    agent.angularSpeed = 75;
-                }
-                else
-                {
-                    agent.angularSpeed = 180;
-                    setWalkPointTimerDuration = 0.25f;
+                    state = States.Idle;
                 }
                 break;
             
             case States.Grabbed:
-                Vector3 _marioTransform = m_marioTransform.position;
-                transform.position = new Vector3(_marioTransform.x, _marioTransform.y + 2,_marioTransform.z);
                 
+                break;
+            
+            case States.Thrown:
                 if (isGrounded)
                 {
-                    state = States.Idle;
-                    goToWalkTimer = goToWalkTimerDuration;
+                    state = States.Walking;
+                    stage++;
+                    m_gameManager.ScreenShake(10,10,0.25f);
                 }
                 break;
+        }
+
+        if (stage > 3)
+        {
+            m_textbox.StartDialogueSequence(m_loseDialogueSequence);
+            stage = -1;
         }
     }
 
     private void SetWalkPoint(Vector3 _walkPoint)
     {
         walkPoint = _walkPoint;
+    }
+
+    public void StartFight()
+    {
+        state = States.Walking;
+        stage = 1;
+    }
+
+    public void EndFight()
+    {
+        m_gameManager.SpawnStar(m_kingBobOmbStar, new Vector3(transform.position.x, transform.position.y + 2.5f, transform.position.z));
+        gameObject.SetActive(false);
     }
 
     private void OnGUI()
@@ -127,6 +161,7 @@ public class KingBobOmb : MonoBehaviour
         if (m_gameManager.enableDebug)
         {
             GUI.Label(new Rect(Screen.width - 400, 10, 300, 40), "state: " + state, m_Style);
+            GUI.Label(new Rect(Screen.width - 400, 60, 300, 40), "stage: " + stage, m_Style);
         }
     }
 }
