@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Unity.Cinemachine;
 using Unity.VisualScripting;
@@ -103,6 +104,7 @@ public class Mario : MonoBehaviour
         Dive,
         DiveSlide,
         HighJump,
+        InsideCannon,
     }
 
     public States state = States.Idle;
@@ -162,7 +164,7 @@ public class Mario : MonoBehaviour
         m_animator.SetBool("isGrounded", isGrounded);
         
         // Decide what state to switch to
-        if (canMove && state != States.Jump && state != States.GroundPound && state != States.LongJump && isGrounded && state != States.GroundPound && state != States.Dive && state != States.Punch && state != States.Kick && state != States.DiveSlide)
+        if (canMove && state != States.Jump && state != States.GroundPound && state != States.LongJump && isGrounded && state != States.GroundPound && state != States.Dive && state != States.Punch && state != States.Kick && state != States.DiveSlide && state != States.InsideCannon)
         {
             if (!isCrouching)
             {
@@ -232,6 +234,7 @@ public class Mario : MonoBehaviour
             
             // Jump
             case States.Jump:
+                moveSpeed = Mathf.Min(moveSpeed + acceleration * Time.deltaTime, maxMoveSpeed);
                 jumpTimer = jumpTimerDuration;
                 
                 if (isGrounded && canMove)
@@ -484,7 +487,7 @@ public class Mario : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext _context)
     {
-        if (_context.performed && canMove)
+        if (_context.performed && canMove && state != States.InsideCannon)
         {
             // Long jump
             if (state != States.LongJump && state != States.Dive)
@@ -529,6 +532,13 @@ public class Mario : MonoBehaviour
                 state = States.Idle;
                 m_animator.SetTrigger("land");
             }
+        }
+
+        if (_context.performed && state == States.InsideCannon)
+        {
+            float _jumpForce = jumpForce * 10f;
+            m_rigidbody.linearVelocity = new Vector3(m_rigidbody.linearVelocity.x, _jumpForce, m_rigidbody.linearVelocity.z);
+            state = States.Jump;
         }
     }
 
@@ -700,7 +710,15 @@ public class Mario : MonoBehaviour
             m_isCollidingWithDialogueHitbox = false;
         }
     }
-    
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Cannon"))
+        {
+            state = States.InsideCannon;
+        }
+    }
+
     private void OnGUI()
     {
         GUIStyle m_Style = new GUIStyle
@@ -714,6 +732,18 @@ public class Mario : MonoBehaviour
             fontSize = 48,
             normal = { textColor = Color.green }
         };
+        
+        float sineWaveValue = Mathf.Sin(Time.time * 5f) * 0.5f + 0.5f;
+        int baseFontSize = Mathf.RoundToInt(Screen.height * 0.035f);
+        int dynamicFontSize = Mathf.RoundToInt(baseFontSize * (0.8f + sineWaveValue * 0.4f));
+
+        GUIStyle m_bouncyText = new GUIStyle
+        {
+            fontSize = dynamicFontSize,
+            alignment = TextAnchor.MiddleCenter,
+            normal = { textColor = Color.white }
+        };
+
 
         if (m_gameManager.enableDebug)
         {
@@ -738,6 +768,11 @@ public class Mario : MonoBehaviour
             GUI.Label(new Rect(10, 910, 300, 40), "iFrameTimer: " + iFrameTimer, m_greenText);
             //GUI.Label(new Rect(10, 960, 300, 40), "attackTimer: " + attackTimer, m_Style);
             GUI.Label(new Rect(10, 960, 300, 40), "power meter showing: " + m_powerMeter.showing, m_Style);
+        }
+
+        if (state == States.InsideCannon)
+        {
+            GUI.Label(new Rect(Screen.width - Screen.width * 0.6f, Screen.height * 0.75f, 300, 40), "Press *Jump* to launch yourself out of the cannon", m_bouncyText);
         }
     }
 }

@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Koopa The Quick Lose Race
   m_EditorClassIdentifier: 
   dialogue:
-  - LMAO YOU'RE SO BAD I BEAT YOU IN THE RACE
-  - Time to DIE
+  - I win! You lose! ha ha ha!
+  - That's what you get for messin' with Koopa the Quick.
+  - Better luck next time!
   textBoxColor: {r: 0, g: 0, b: 0, a: 0.39215687}
   textColor: {r: 1, g: 1, b: 1, a: 1}
   dialogueType: 3

@@ -10,11 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbfa747813ca2a249b7aa1768c0873b4, type: 3}
-  m_Name: Dialogue Test
+  m_Name: Pink Bob Omb Cannon Opened
   m_EditorClassIdentifier: 
   dialogue:
-  - FORTNITE
-  - 5 big booms
+  - Ready for blastoff! Come on, hop into the cannon!
+  - You can reach the star on the floating island by using the four cannons.
+  - Jump into the cannon, then use B (Nintendo) / A (Xbox) / X (Playstation) to shoot
+    yourself into the air.
+  - If you're handy, you can grab on to trees or poles to land.
   textBoxColor: {r: 0, g: 0, b: 0, a: 0.39215687}
   textColor: {r: 1, g: 1, b: 1, a: 1}
-  dialogueType: 1
+  dialogueType: 0

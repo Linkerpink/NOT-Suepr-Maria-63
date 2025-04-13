@@ -10,11 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbfa747813ca2a249b7aa1768c0873b4, type: 3}
-  m_Name: Koopa The Quick Win Race
+  m_Name: Koopa The Quick Start Race
   m_EditorClassIdentifier: 
   dialogue:
-  - Hufff...fff...pufff... Whoa! You...really...are...fast! A human blur! Here you
-    go--you've won it, fair and square!
+  - Hey, Mario! Is it true that you beat the Big Bob-omb? Cool!
+  - You must be strong. And pretty fast. So, how fast are you, anyway?
+  - Fast enough to beat me... Koopa the Quick? I don't think so. Just try me.
+  - How about a race to the mountaintop, Where the Big Bob-omb Was?
+  - Whaddya say? When i say "Go," let the race begin!
+  - 3, 2, 1...
+  - Go!
   textBoxColor: {r: 0, g: 0, b: 0, a: 0.39215687}
   textColor: {r: 1, g: 1, b: 1, a: 1}
-  dialogueType: 2
+  dialogueType: 1

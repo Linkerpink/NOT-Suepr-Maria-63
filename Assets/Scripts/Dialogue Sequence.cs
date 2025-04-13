@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [CreateAssetMenu]
@@ -14,9 +15,12 @@ public class DialogueSequence : ScriptableObject
         KoopaTheQuickStartRace,
         KoopaTheQuickWinRace,
         KoopaTheQuickLoseRace,
+        PinkBobOmbOpenCannon,
     }
     
     public DialogueTypes dialogueType;
+
+    private Mario m_mario;
 
     public void EndDialogueFunction()
     {
@@ -33,8 +37,20 @@ public class DialogueSequence : ScriptableObject
                 break;
             
             case DialogueTypes.KoopaTheQuickLoseRace:
-                Mario _mario = FindAnyObjectByType<Mario>();
-                _mario.Die();
+                m_mario = FindObjectOfType<Mario>();
+                m_mario.Die();
+                break;
+            
+            case DialogueTypes.PinkBobOmbOpenCannon:
+                // Open Cannons
+                GameManager _gameManager = FindAnyObjectByType<GameManager>();
+                if (!_gameManager.cannonsOpened)
+                {
+                    m_mario = FindObjectOfType<Mario>();
+                    Animator m_animator = FindAnyObjectByType<BobOmbBattlefieldLevelEvents>().GetComponent<Animator>();
+                    m_animator.SetTrigger("openCannon");
+                    m_mario.canMove = false;
+                }
                 break;
         }
     }

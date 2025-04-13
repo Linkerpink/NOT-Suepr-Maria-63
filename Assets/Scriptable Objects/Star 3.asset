@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e264d7b689bd8c4dadb6f8ea257dcb7, type: 3}
-  m_Name: Star 2
+  m_Name: Star 3
   m_EditorClassIdentifier: 
-  starName: FOOTRACE WITH KOOPA THE QUICK
-  starNumber: 1
+  starName: SHOOT TO THE ISLAND IN THE SKY
+  starNumber: 2

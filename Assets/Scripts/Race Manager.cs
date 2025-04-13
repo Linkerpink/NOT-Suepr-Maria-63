@@ -28,6 +28,13 @@ public class RaceManager : MonoBehaviour
             raceTime += Time.deltaTime;
             m_raceTimerText.SetText("TIME: " + raceTime.ToString("N"));
         }
+
+        switch (raceState)
+        {
+            case RaceStates.Nothing:
+                m_raceTimerText.SetText("");
+                break;
+        }
     }
 
     public void StartRace()

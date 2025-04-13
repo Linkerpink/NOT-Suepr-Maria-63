@@ -10,11 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbfa747813ca2a249b7aa1768c0873b4, type: 3}
-  m_Name: Koopa The Quick Win Race
+  m_Name: Pink Bob Omb Open Cannon
   m_EditorClassIdentifier: 
   dialogue:
-  - Hufff...fff...pufff... Whoa! You...really...are...fast! A human blur! Here you
-    go--you've won it, fair and square!
+  - We're peace-loving Bob-ombs, so we don't use cannons.
+  - But if you'd like to blast off, we don't mind. Help yourself.
+  - We'll prepare all of the cannons in this courese for you to use. Bon Voyage!
   textBoxColor: {r: 0, g: 0, b: 0, a: 0.39215687}
   textColor: {r: 1, g: 1, b: 1, a: 1}
-  dialogueType: 2
+  dialogueType: 4

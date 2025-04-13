@@ -32,15 +32,23 @@ public class GameManager : MonoBehaviour
     private Mario m_mario;
     
     private PlayerInput m_playerInput;
+
+    public bool cannonsOpened = false;
+    
+    // UI
+    private TextMeshProUGUI m_starsText;
     
     private void Awake()
     {
+        /*
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
         Instance = this;
+        */
+        
         DontDestroyOnLoad(gameObject);
         
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -69,7 +77,14 @@ public class GameManager : MonoBehaviour
         {
             lockCursor = false;
         }
+        
+        // UI
+        if (m_starsText != null)
+        {
+            m_starsText.SetText("X" + starsCollected.Count);
+        }
 
+        // Application
         if (Application.isFocused)
         {
             lockCursor = true;
@@ -80,8 +95,7 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        SetObjects();
-        SetObjectsDelay(0.1f);
+        StartCoroutine(SetObjectsWhenReady());
     }
 
     private void SetObjects()
@@ -107,11 +121,6 @@ public class GameManager : MonoBehaviour
         
         m_starSelect = GameObject.Find("Star Select");
         m_starObjects = GameObject.Find("Star Objects");
-
-        if (m_starObjects != null)
-        {
-            m_starObjects.SetActive(false);
-        }
         
         m_mario = FindAnyObjectByType<Mario>();
 
@@ -126,13 +135,19 @@ public class GameManager : MonoBehaviour
                 m_mario.canMove = true;    
             }
         }
+        
+        m_starsText = GameObject.Find("Stars Text").GetComponent<TextMeshProUGUI>();
     }
     
-    IEnumerator SetObjectsDelay(float _delay)
+    private IEnumerator SetObjectsWhenReady()
     {
-        yield return new WaitForSeconds(_delay);
+        while (GameObject.Find("Canvas") == null)
+        {
+            yield return null;
+        }
         SetObjects();
     }
+
 
     public void StartTransitionAnimation(string _animation)
     {
@@ -144,6 +159,10 @@ public class GameManager : MonoBehaviour
 
     public UnityAction SelectStar(Star _star)
     {
+        StartCoroutine(InitializeLevel(_star));
+        currentStar = _star;
+        
+        /*
         if (GameManager.Instance == null)
         {
             Debug.LogError("GameManager instance is destroyed!");
@@ -155,65 +174,93 @@ public class GameManager : MonoBehaviour
             Debug.LogError("SelectStar: Required objects are not initialized!");
             return null;
         }
-
-        StartCoroutine(InitializeLevel(_star));
-        currentStar = _star;
+        */
+        
         return null;
     }
-
-
-
-    public IEnumerator<Star> InitializeLevel(Star _star)
+    
+    public IEnumerator InitializeLevel(Star _star)
     {
-        m_starSelect.SetActive(false);
-        m_starObjects.SetActive(true);
-        m_mario.canMove = true;
+        if (m_starSelect == null && m_starObjects == null)
+        {
+            Debug.Log("zelfm,orod");
+            SetObjects();
+            yield return new WaitForSeconds(0.1f);
+        }
+        else
+        {
+            SetObjects();
+            m_starSelect.SetActive(false);
+            m_starObjects.SetActive(true);
+            m_mario.canMove = true;
 
-        foreach (Transform _child in m_starObjects.transform)
-        {
-            _child.gameObject.SetActive(false);
-        }
-        
-        if (_star.name == "Star 1")
-        {
             foreach (Transform _child in m_starObjects.transform)
             {
-                if (_child.name == "Star 1 Objects")
-                {
-                    _child.gameObject.SetActive(true);
-                    
-                    foreach (Transform _child2 in _child.transform)
-                    {
-                        _child2.gameObject.SetActive(true);
-                    }
-                }
-                else
-                {
-                    _child.gameObject.SetActive(false);
-                }
+                _child.gameObject.SetActive(false);
             }
-        }
-        
-        if (_star.name == "Star 2")
-        {
-            foreach (Transform _child in m_starObjects.transform)
+            
+            if (_star.name == "Star 1")
             {
-                if (_child.name == "Star 2 Objects")
+                foreach (Transform _child in m_starObjects.transform)
                 {
-                    _child.gameObject.SetActive(true);
-                    
-                    foreach (Transform _child2 in _child.transform)
+                    if (_child.name == "Star 1 Objects")
                     {
-                        _child2.gameObject.SetActive(true);
+                        _child.gameObject.SetActive(true);
+                        
+                        foreach (Transform _child2 in _child.transform)
+                        {
+                            _child2.gameObject.SetActive(true);
+                        }
+                    }
+                    else
+                    {
+                        _child.gameObject.SetActive(false);
                     }
                 }
-                else
+            }
+            
+            if (_star.name == "Star 2")
+            {
+                foreach (Transform _child in m_starObjects.transform)
                 {
-                    _child.gameObject.SetActive(false);
+                    if (_child.name == "Star 2 Objects")
+                    {
+                        _child.gameObject.SetActive(true);
+                        
+                        foreach (Transform _child2 in _child.transform)
+                        {
+                            _child2.gameObject.SetActive(true);
+                        }
+                    }
+                    else
+                    {
+                        _child.gameObject.SetActive(false);
+                    }
                 }
             }
+
+            if (_star.name == "Star 3")
+            {
+                foreach (Transform _child in m_starObjects.transform)
+                {
+                    if (_child.name == "Star 3 Objects")
+                    {
+                        _child.gameObject.SetActive(true);
+                        
+                        foreach (Transform _child2 in _child.transform)
+                        {
+                            _child2.gameObject.SetActive(true);
+                        }
+                    }
+                    else
+                    {
+                        _child.gameObject.SetActive(false);
+                    }
+                }
+            }
+
+            yield return null;
         }
-        yield return null;
     }
 
     public void HoverOverStar(Star _star)
@@ -246,6 +293,8 @@ public class GameManager : MonoBehaviour
         {
             starsCollected.Add(_star);
         }
+        
+        currentStar = null;
         
         print("starsCollected: " + starsCollected);
     }

@@ -20,15 +20,6 @@ public class StarSelectStar : MonoBehaviour
     private void Start()
     {
         m_button.onClick.AddListener(() => m_gameManager.SelectStar(m_star));
-
-        if (m_gameManager.starsCollected.Contains(m_star))
-        {
-            m_image.color = Color.white;
-        }
-        else
-        {
-            m_image.color = Color.gray;
-        }
     }
 
     private void Update()
@@ -36,6 +27,15 @@ public class StarSelectStar : MonoBehaviour
         if (EventSystem.current.currentSelectedGameObject == this.gameObject)
         {
             m_gameManager.HoverOverStar(m_star);
+        }
+        
+        if (m_gameManager.starsCollected.Contains(m_star))
+        {
+            m_image.color = Color.white;
+        }
+        else
+        {
+            m_image.color = Color.gray;
         }
     }
 }

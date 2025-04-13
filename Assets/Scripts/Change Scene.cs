@@ -48,6 +48,5 @@ public class ChangeScene : MonoBehaviour
         m_startTransition = true;
         m_gameManager.StartTransitionAnimation(m_transitionInAnimation);
         m_gameManager.transitionOutAnimation = m_transitionOutAnimation;
-
     }
 }
