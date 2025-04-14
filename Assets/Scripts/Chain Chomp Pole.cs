@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ChainChompPole : MonoBehaviour
 {
-    private int m_pos = 0;
+    [SerializeField] private int m_pos = 0;
 
     private float m_yPos = 0;
 
@@ -24,6 +24,8 @@ public class ChainChompPole : MonoBehaviour
                 break;
             case 2:
                 m_yPos = m_yPositions[2];
+                m_chainChompAreaAnimator.SetTrigger("breakGate");
+                gameObject.SetActive(false);
                 break;
         }
     }
@@ -32,11 +34,7 @@ public class ChainChompPole : MonoBehaviour
     {
         if (m_pos < 2)
         { 
-            m_pos++;    
-        }
-        else
-        {
-            m_chainChompAreaAnimator.SetTrigger("breakGate");
+            m_pos++;
         }
     }
 }

@@ -847,7 +847,7 @@ public class Mario : MonoBehaviour
             GUI.Label(new Rect(10, 860, 300, 40), "HP: " + hp, m_greenText);
             GUI.Label(new Rect(10, 910, 300, 40), "iFrameTimer: " + iFrameTimer, m_greenText);
             //GUI.Label(new Rect(10, 960, 300, 40), "attackTimer: " + attackTimer, m_Style);
-            GUI.Label(new Rect(10, 960, 300, 40), "power meter showing: " + m_powerMeter.showing, m_Style);
+            GUI.Label(new Rect(10, 960, 300, 40), "isCollidingWithPole: " + isCollidingWithPole, m_Style);
         }
 
         if (state == States.InsideCannon)

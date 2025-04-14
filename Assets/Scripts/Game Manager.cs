@@ -29,6 +29,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject m_starPrefab;
     
     [SerializeField] private TextMeshProUGUI m_starText;
+
+    public bool spawned100CoinStar = false;
     
     private Mario m_mario;
     
@@ -166,6 +168,7 @@ public class GameManager : MonoBehaviour
         m_coinsText = GameObject.Find("Coins Text").GetComponent<TextMeshProUGUI>();
         
         coinsCollected = 0;
+        spawned100CoinStar = false;
     }
     
     private IEnumerator SetObjectsWhenReady()
