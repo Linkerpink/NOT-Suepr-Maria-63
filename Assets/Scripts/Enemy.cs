@@ -151,12 +151,4 @@ public class Enemy : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
-
-    private void OnCollisionEnter(Collision _collision)
-    {
-        if (_collision.gameObject.CompareTag("Player"))
-        {
-            DamagePlayer(1);
-        }
-    }
 }

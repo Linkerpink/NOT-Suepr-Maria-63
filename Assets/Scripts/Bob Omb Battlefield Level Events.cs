@@ -29,6 +29,12 @@ public class BobOmbBattlefieldLevelEvents : MonoBehaviour
         m_mario.canMove = false;
     }
 
+    public void TurnOnMarioMovement()
+    {
+        m_mario = FindObjectOfType<Mario>();
+        m_mario.canMove = true;
+    }
+
     public void StartDialogue()
     {
         m_mario = FindObjectOfType<Mario>();

@@ -86,7 +86,7 @@ public class KoopaTheQuick : MonoBehaviour
     {
         m_agent.enabled = false;
         print("race gewonnen :O");
-        m_gameManager.SpawnStar(m_star, new Vector3(transform.position.x, transform.position.y + 2.5f, transform.position.z));
+        GameManager.Instance.SpawnStar(m_star, new Vector3(transform.position.x, transform.position.y + 2.5f, transform.position.z));
         racing = false;
         gameObject.SetActive(false);
     }

@@ -18,4 +18,4 @@ MonoBehaviour:
   - We'll prepare all of the cannons in this courese for you to use. Bon Voyage!
   textBoxColor: {r: 0, g: 0, b: 0, a: 0.39215687}
   textColor: {r: 1, g: 1, b: 1, a: 1}
-  dialogueType: 4
+  dialogueType: 6

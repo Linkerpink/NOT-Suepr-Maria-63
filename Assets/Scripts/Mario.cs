@@ -15,6 +15,7 @@ public class Mario : MonoBehaviour
     private Rigidbody m_rigidbody;
     public Transform cameraTransform;
     public LayerMask groundLayer;
+    [SerializeField] private LayerMask poleLayer;
     public bool canMove = false;
     [SerializeField] private float stickDeadZone = 0.5f;
     
@@ -60,6 +61,7 @@ public class Mario : MonoBehaviour
     [SerializeField] private float turnSmoothTime = 0.1f;
     private float turnSmoothVelocity;
     private bool isGrounded;
+    private bool isCollidingWithPole;
     
     // Directions
     private Vector3 moveDirection;
@@ -152,7 +154,7 @@ public class Mario : MonoBehaviour
     {
         isGrounded = Physics.Raycast(transform.position, Vector3.down, groundedRayCastLength, groundLayer);
         isOnEnemy = Physics.Raycast(transform.position, Vector3.down, groundedRayCastLength, enemyLayer);
-        
+        isCollidingWithPole = Physics.Raycast(transform.position, Vector3.down, groundedRayCastLength, poleLayer);
         
         if (inputDirection.sqrMagnitude > 0.01f && state != States.DiveSlide && canMove) 
         {
@@ -245,7 +247,7 @@ public class Mario : MonoBehaviour
                 moveSpeed = Mathf.Min(moveSpeed + acceleration * Time.deltaTime, maxMoveSpeed);
                 jumpTimer = jumpTimerDuration;
                 
-                if (isGrounded && canMove)
+                if (isGrounded && canMove || isCollidingWithPole && canMove)
                 {
                     m_animator.SetTrigger("land");
                     state = States.Idle;
@@ -282,6 +284,17 @@ public class Mario : MonoBehaviour
                     state = States.Idle;
                     m_animator.SetTrigger("land");
                 }
+
+                if (isCollidingWithPole && canMove)
+                {
+                    state = States.Idle;
+                    m_animator.SetTrigger("land");
+
+                    ChainChompPole _pole = GameObject.Find("Chain Chomp Area").GetComponentInChildren<ChainChompPole>();
+                    
+                    _pole.IncreasePolePosition();
+                }
+                
                 jumpCount = 0;
                 isCrouching = false;
                 break;
@@ -308,7 +321,7 @@ public class Mario : MonoBehaviour
                 }
                 else
                 {
-                    if (isGrounded && canMove)
+                    if (isGrounded && canMove || isCollidingWithPole && canMove)
                     {
                         state = States.Idle;
                         longJumpTimer = 0;
@@ -319,7 +332,7 @@ public class Mario : MonoBehaviour
             
             // HighJump
             case States.HighJump:
-                if (isGrounded && canMove)
+                if (isGrounded && canMove || isCollidingWithPole && canMove)
                 {
                     m_animator.SetTrigger("land");
                     state = States.Idle;
@@ -364,7 +377,7 @@ public class Mario : MonoBehaviour
             
             // Dive
             case States.Dive:
-                if (isGrounded)
+                if (isGrounded || isCollidingWithPole && canMove)
                 {
                     state = States.DiveSlide;
                     diveSlideTimer = diveSlideTimerDuration;
@@ -523,7 +536,7 @@ public class Mario : MonoBehaviour
             }
         
             // Jump
-            if (isGrounded && state != States.Jump && state != States.LongJump && state != States.DiveSlide)
+            if (isGrounded && state != States.Jump && state != States.LongJump && state != States.DiveSlide || isCollidingWithPole && state != States.Jump && state != States.LongJump && state != States.DiveSlide)
             {
                 if (jumpCount < 3)
                 {
@@ -651,7 +664,7 @@ public class Mario : MonoBehaviour
 
     public void TakeDamage(int _damageAmount)
     {
-        if (!isOnEnemy && state != States.Punch && state != States.Kick && state != States.Dive && iFrameTimer <= 0)
+        if (iFrameTimer <= 0)
         {
             hp -= _damageAmount;
             if (hp <= 0)
@@ -720,7 +733,7 @@ public class Mario : MonoBehaviour
         if (other.CompareTag("Star"))
         {
             print("should pick up star");
-            m_gameManager.GetStar(other.gameObject.GetComponent<StarHolder>().star);
+            GameManager.Instance.GetStar(other.gameObject.GetComponent<StarHolder>().star);
             other.gameObject.SetActive(false);
             m_pickedUpStar = true;
         }
@@ -739,12 +752,27 @@ public class Mario : MonoBehaviour
                 }    
             }
 
-            if (m_gameManager.currentStar.name == "Star 1" && m_kingBobOmb != null)
+            if (GameManager.Instance.currentStar != null && m_kingBobOmb != null)
             {
-                if (m_kingBobOmb.stage == 0)
+                if (m_kingBobOmb.stage == 0 && GameManager.Instance.currentStar.name == "Star 1")
                 {
                     m_textbox.StartDialogueSequence(m_kingBobOmbStartBattleDialogueSequence);    
                 }
+            }
+        }
+
+        if (other.CompareTag("Enemy"))
+        {
+            Enemy _enemy = other.GetComponent<Enemy>();
+            
+            if (!isOnEnemy && state != States.Punch && state != States.Kick && state != States.Dive &&
+                state != States.Jump && state != States.GroundPound)
+            {
+                TakeDamage(_enemy.damageAmount);
+            }
+            else
+            {
+                _enemy.TakeDamage(1);
             }
         }
     }
@@ -797,7 +825,7 @@ public class Mario : MonoBehaviour
         };
 
 
-        if (m_gameManager.enableDebug)
+        if (GameManager.Instance.enableDebug)
         {
             GUI.Label(new Rect(10, 10, 300, 40), "Player move speed: " + moveSpeed, m_Style);
             GUI.Label(new Rect(10, 60, 300, 40), "Is grounded: " + isGrounded, m_Style);

@@ -22,4 +22,4 @@ MonoBehaviour:
   - Go!
   textBoxColor: {r: 0, g: 0, b: 0, a: 0.39215687}
   textColor: {r: 1, g: 1, b: 1, a: 1}
-  dialogueType: 1
+  dialogueType: 3

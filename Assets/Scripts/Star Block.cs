@@ -19,7 +19,7 @@ public class StarBlock : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player") && m_mario.state == Mario.States.Jump)
         {
-            m_gameManager.SpawnStar(m_star, transform.position);
+            GameManager.Instance.SpawnStar(m_star, transform.position);
             gameObject.SetActive(false);
         }
     }

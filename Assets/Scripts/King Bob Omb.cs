@@ -140,7 +140,7 @@ public class KingBobOmb : MonoBehaviour
 
     public void EndFight()
     {
-        m_gameManager.SpawnStar(m_kingBobOmbStar, new Vector3(transform.position.x, transform.position.y + 2.5f, transform.position.z));
+        GameManager.Instance.SpawnStar(m_kingBobOmbStar, new Vector3(transform.position.x, transform.position.y + 2.5f, transform.position.z));
         gameObject.SetActive(false);
     }
 
@@ -158,7 +158,7 @@ public class KingBobOmb : MonoBehaviour
             normal = { textColor = Color.green }
         };
         
-        if (m_gameManager.enableDebug)
+        if (GameManager.Instance.enableDebug)
         {
             GUI.Label(new Rect(Screen.width - 400, 10, 300, 40), "state: " + state, m_Style);
             GUI.Label(new Rect(Screen.width - 400, 60, 300, 40), "stage: " + stage, m_Style);

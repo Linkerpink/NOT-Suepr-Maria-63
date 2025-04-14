@@ -19,17 +19,19 @@ public class StarSelectStar : MonoBehaviour
     
     private void Start()
     {
-        m_button.onClick.AddListener(() => m_gameManager.SelectStar(m_star));
+        m_button.onClick.AddListener(() => GameManager.Instance.SelectStar(m_star));
+
+        //m_button.onClick.AddListener(() => m_gameManager.SelectStar(m_star));
     }
 
     private void Update()
     {
         if (EventSystem.current.currentSelectedGameObject == this.gameObject)
         {
-            m_gameManager.HoverOverStar(m_star);
+            GameManager.Instance.HoverOverStar(m_star);
         }
         
-        if (m_gameManager.starsCollected.Contains(m_star))
+        if (GameManager.Instance.starsCollected.Contains(m_star))
         {
             m_image.color = Color.white;
         }

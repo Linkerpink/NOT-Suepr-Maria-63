@@ -35,30 +35,47 @@ public class GameManager : MonoBehaviour
     private PlayerInput m_playerInput;
 
     public bool cannonsOpened = false;
+
+    public int coinsCollected = 0;
     
     // UI
-    [SerializeField] private TextMeshProUGUI m_starsText;
+    private TextMeshProUGUI m_starsText;
+    private TextMeshProUGUI m_coinsText;
     
     private CinemachineBasicMultiChannelPerlin m_perlin;
     
+    // private void Awake()
+    // {
+    //     /*
+    //     if (Instance != null && Instance != this)
+    //     {
+    //         Destroy(gameObject);
+    //         return;
+    //     }
+    //     Instance = this;
+    //     */
+    //     
+    //     DontDestroyOnLoad(gameObject);
+    //     
+    //     SceneManager.sceneLoaded += OnSceneLoaded;
+    //
+    //     m_playerInput = GetComponent<PlayerInput>();
+    // }
+    
     private void Awake()
     {
-        /*
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
         Instance = this;
-        */
-        
         DontDestroyOnLoad(gameObject);
-        
+
         SceneManager.sceneLoaded += OnSceneLoaded;
 
         m_playerInput = GetComponent<PlayerInput>();
     }
-
 
     private void Update()
     {
@@ -86,6 +103,11 @@ public class GameManager : MonoBehaviour
         if (m_starsText != null)
         {
             SetStarsText();
+        }
+
+        if (m_coinsText != null)
+        {
+            SetCoinsText();
         }
 
         // Application
@@ -141,7 +163,9 @@ public class GameManager : MonoBehaviour
         }
         
         m_starsText = GameObject.Find("Stars Text").GetComponent<TextMeshProUGUI>();
+        m_coinsText = GameObject.Find("Coins Text").GetComponent<TextMeshProUGUI>();
         
+        coinsCollected = 0;
     }
     
     private IEnumerator SetObjectsWhenReady()
@@ -286,6 +310,16 @@ public class GameManager : MonoBehaviour
         if (m_starsText != null)
         {
             m_starsText.SetText("X" + starsCollected.Count);
+        }
+    }
+
+    private void SetCoinsText()
+    {
+        m_coinsText = GameObject.Find("Coins Text").GetComponent<TextMeshProUGUI>();
+        
+        if (m_coinsText != null)
+        {
+            m_coinsText.SetText("X" + coinsCollected);
         }
     }
 

@@ -63,7 +63,7 @@ public class DialogueSequence : ScriptableObject
             case DialogueTypes.PinkBobOmbOpenCannon:
                 // Open Cannons
                 m_gameManager = FindAnyObjectByType<GameManager>();
-                if (!m_gameManager.cannonsOpened)
+                if (!GameManager.Instance.cannonsOpened)
                 {
                     m_mario = FindObjectOfType<Mario>();
                     Animator m_animator = FindAnyObjectByType<BobOmbBattlefieldLevelEvents>().GetComponent<Animator>();
