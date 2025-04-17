@@ -66,7 +66,7 @@ public class DialogueSequence : ScriptableObject
                 if (!GameManager.Instance.cannonsOpened)
                 {
                     m_mario = FindObjectOfType<Mario>();
-                    Animator m_animator = FindAnyObjectByType<BobOmbBattlefieldLevelEvents>().GetComponent<Animator>();
+                    Animator m_animator = GameObject.Find("Cannon Covers").GetComponent<Animator>();
                     m_animator.SetTrigger("openCannon");
                     m_mario.canMove = false;
                 }

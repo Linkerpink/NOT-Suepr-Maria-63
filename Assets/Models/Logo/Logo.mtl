@@ -1,0 +1,56 @@
+# Blender3D MTL File: Logo.blend
+# Material Count: 5
+newmtl Material.004_Logo_grp.png
+Ns 0.000000
+Ka 0.000000 0.000000 0.000000
+Kd 0.600000 0.600000 0.600000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Logo_grp.png
+
+
+newmtl Material.001_Logo_grp.png
+Ns 0.000000
+Ka 0.000000 0.000000 0.000000
+Kd 0.000000 0.753125 0.000000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Logo_grp.png
+
+
+newmtl Material.003_Logo_grp.png
+Ns 0.000000
+Ka 0.000000 0.000000 0.000000
+Kd 0.231250 0.231250 0.231250
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Logo_grp.png
+
+
+newmtl Material.005
+Ns 0.000000
+Ka 0.000000 0.000000 0.000000
+Kd 0.000000 0.000000 0.000000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+
+newmtl Material.002_Logo_grp.png
+Ns 0.000000
+Ka 0.000000 0.000000 0.000000
+Kd 0.465625 0.465625 0.303125
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Logo_grp.png
+
+

@@ -45,24 +45,18 @@ public class GameManager : MonoBehaviour
     private TextMeshProUGUI m_coinsText;
     
     private CinemachineBasicMultiChannelPerlin m_perlin;
+
+    public string currentScene;
     
-    // private void Awake()
-    // {
-    //     /*
-    //     if (Instance != null && Instance != this)
-    //     {
-    //         Destroy(gameObject);
-    //         return;
-    //     }
-    //     Instance = this;
-    //     */
-    //     
-    //     DontDestroyOnLoad(gameObject);
-    //     
-    //     SceneManager.sceneLoaded += OnSceneLoaded;
-    //
-    //     m_playerInput = GetComponent<PlayerInput>();
-    // }
+    // One time Dialogue thingies
+    
+    // Intro dialogue
+    public bool shownIntroDialogue = false;
+    public DialogueSequence introDialogueSequence;
+    
+    // Castle intro dialogue
+    public bool shownCastleIntroDialogue = false;
+    public DialogueSequence castleIntroDialogueSequence;
     
     private void Awake()
     {
@@ -128,6 +122,8 @@ public class GameManager : MonoBehaviour
 
     private void SetObjects()
     {
+        currentScene = SceneManager.GetActiveScene().name;
+        
         m_canvas = GameObject.Find("Canvas");
 
         if (m_canvas != null)
@@ -361,5 +357,41 @@ public class GameManager : MonoBehaviour
         //Reset noise
         m_perlin.AmplitudeGain = 0;
         m_perlin.FrequencyGain = 0;
+    }
+
+    private void OnGUI()
+    {
+        GUIStyle m_Style = new GUIStyle
+        {
+            fontSize = 48,
+            normal = { textColor = Color.white }
+        };
+        
+        GUIStyle m_greenText = new GUIStyle
+        {
+            fontSize = 48,
+            normal = { textColor = Color.green }
+        };
+        
+        float sineWaveValue = Mathf.Sin(Time.time * 5f) * 0.5f + 0.5f;
+        int baseFontSize = Mathf.RoundToInt(Screen.height * 0.035f);
+        int dynamicFontSize = Mathf.RoundToInt(baseFontSize * (0.8f + sineWaveValue * 0.4f));
+
+        GUIStyle m_bouncyText = new GUIStyle
+        {
+            fontSize = dynamicFontSize,
+            alignment = TextAnchor.MiddleCenter,
+            normal = { textColor = Color.white }
+        };
+
+        if (starsCollected.Count >= 5 && currentScene == "Peach's Castle Inside Main Room")
+        {
+            GUI.Label(new Rect(Screen.width - Screen.width * 0.6f, Screen.height * 0.75f, 300, 40), "You collected all the stars!", m_bouncyText);
+        }
+
+        if (starsCollected.Count <= 0 && currentScene == "Peach's Castle Inside Main Room")
+        {
+            GUI.Label(new Rect(Screen.width - Screen.width * 0.6f, Screen.height * 0.75f, 300, 40), "Go to Bob Omb Battlefield to collect power stars", m_bouncyText);
+        }
     }
 }

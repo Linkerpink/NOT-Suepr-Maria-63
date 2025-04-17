@@ -46,3 +46,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enableDebug: 0
   transitionOutAnimation: 
+  m_backgroundAnimator: {fileID: 0}
+  stars: []
+  starsCollected: []
+  currentStar: {fileID: 0}
+  m_starPrefab: {fileID: 833520217943575302, guid: 18a81dea7ec4a234385eda833cb927f1, type: 3}
+  m_starText: {fileID: 0}
+  spawned100CoinStar: 0
+  cannonsOpened: 0
+  coinsCollected: 0
+  currentScene: 
+  shownIntroDialogue: 0
+  introDialogueSequence: {fileID: 0}
+  shownCastleIntroDialogue: 0
+  castleIntroDialogueSequence: {fileID: 11400000, guid: ec9ce67ce86bdb94aa641a1016cbc0ed, type: 2}

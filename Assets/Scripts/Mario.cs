@@ -183,6 +183,7 @@ public class Mario : MonoBehaviour
                 if (inputDirection.sqrMagnitude >= 0.25f)
                 {
                     state = States.Run;
+                    m_animator.Play("Run");
                 }
                 else if (inputDirection.sqrMagnitude >= 0.01f)
                 {
@@ -216,6 +217,21 @@ public class Mario : MonoBehaviour
         if (!isGrounded && state != States.GroundPound && state != States.LongJump && state != States.Dive && state != States.Punch && state != States.Kick)
         {
             state = States.Jump;
+
+            switch (jumpCount)
+            {
+                case 1:
+                    m_animator.Play("Jump");
+                    break;
+                
+                case 2:
+                    m_animator.Play("Double Jump");
+                    break;
+                
+                case 3:
+                    m_animator.Play("Triple jump");
+                    break;
+            }
         }
         
         // State switching
@@ -475,8 +491,6 @@ public class Mario : MonoBehaviour
             m_marioVisual.SetActive(false);
         }
         
-        m_animator.SetInteger("jumpCount", jumpCount);
-        
         if (canMove)
         {
             m_playerInput.actions.FindActionMap("Player").Enable();
@@ -637,7 +651,7 @@ public class Mario : MonoBehaviour
                 // Punch
                 attackCount++;
                 state = States.Punch;
-                m_animator.SetTrigger("punch");
+                m_animator.Play("Punch");
                 attackTimer = attackTimerDuration;
                 attackComboTimer = attackComboTimerDuration;
             }
@@ -646,7 +660,7 @@ public class Mario : MonoBehaviour
                 // Kick
                 attackCount++;
                 state = States.Kick;
-                m_animator.SetTrigger("kick");
+                m_animator.Play("Kick");
                 attackTimer = attackTimerDuration;
                 attackComboTimer = attackComboTimerDuration;
             }
@@ -656,7 +670,7 @@ public class Mario : MonoBehaviour
                 //Dive
                 attackCount++;
                 state = States.Dive;
-                m_animator.SetTrigger("dive");
+                m_animator.Play("Dive");
                 m_rigidbody.linearVelocity = new Vector3(m_rigidbody.linearVelocity.x * 1.5f, m_rigidbody.linearVelocity.y, m_rigidbody.linearVelocity.z * 1.5f);
             }
         }
@@ -759,6 +773,16 @@ public class Mario : MonoBehaviour
                     m_textbox.StartDialogueSequence(m_kingBobOmbStartBattleDialogueSequence);    
                 }
             }
+
+            if (!GameManager.Instance.shownCastleIntroDialogue)
+            {
+                if (other.CompareTag("Castle Dialogue"))
+                {
+                    GameManager.Instance.shownCastleIntroDialogue = true;
+                    m_textbox.StartDialogueSequence(GameManager.Instance.castleIntroDialogueSequence);
+
+                }
+            }
         }
 
         if (other.CompareTag("Enemy"))
@@ -774,6 +798,11 @@ public class Mario : MonoBehaviour
             {
                 _enemy.TakeDamage(1);
             }
+        }
+
+        if (other.CompareTag("Death"))
+        {
+            Die();
         }
     }
 

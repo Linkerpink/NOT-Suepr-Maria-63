@@ -135,13 +135,33 @@ PrefabInstance:
       propertyPath: diveSlideTimerDuration
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 7220261871650375313, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
+      propertyPath: m_ActionEvents.Array.size
+      value: 21
+      objectReference: {fileID: 0}
+    - target: {fileID: 7220261871650375313, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
+      propertyPath: m_ActionEvents.Array.data[20].m_ActionId
+      value: 957a8458-0352-4c06-8bbc-ddbad4001c62
+      objectReference: {fileID: 0}
+    - target: {fileID: 7220261871650375313, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
+      propertyPath: m_ActionEvents.Array.data[20].m_ActionName
+      value: 'Player/Start[/DualSenseGamepadHID/start,/Keyboard/enter]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7220261871650375313, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
+      propertyPath: m_ActionEvents.Array.data[19].m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 732710731}
+    - target: {fileID: 7220261871650375313, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
+      propertyPath: m_ActionEvents.Array.data[19].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnSubmit
+      objectReference: {fileID: 0}
     - target: {fileID: 7773276219111356563, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
       propertyPath: m_Name
       value: Mario
       objectReference: {fileID: 0}
     - target: {fileID: 9165585087309065643, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -69.03
+      value: -67.17
       objectReference: {fileID: 0}
     - target: {fileID: 9165585087309065643, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
       propertyPath: m_LocalPosition.y
@@ -149,7 +169,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9165585087309065643, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -126.54599
+      value: -130.26
       objectReference: {fileID: 0}
     - target: {fileID: 9165585087309065643, guid: 7e8fcaec9cf641840b91bfbda8b13bee, type: 3}
       propertyPath: m_LocalRotation.w
@@ -194,14 +214,15 @@ GameObject:
   m_Component:
   - component: {fileID: 510285846}
   - component: {fileID: 510285845}
+  - component: {fileID: 510285848}
   - component: {fileID: 510285847}
   m_Layer: 0
-  m_Name: CinemachineCamera
+  m_Name: Intro Cam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &510285845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -282,6 +303,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &510285848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 510285844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80cdb34eb95f61a47917869d3fe75693, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_introDialogueSequence: {fileID: 11400000, guid: effb12c94c5fdac4181e3fb722489497, type: 2}
 --- !u!1001 &563893330
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -825,6 +859,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &732710731 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5236966026620457331, guid: 51f31cfd7139d3e49aad56cc8e9b0323, type: 3}
+  m_PrefabInstance: {fileID: 751269777135361241}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03da583a2e9f36343b2bb9823a813f8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &760547546
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1366,27 +1411,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3753742920196742577, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.825621
+      value: 0.83114684
       objectReference: {fileID: 0}
     - target: {fileID: 3753742920196742577, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -136.42462
+      value: -139.2149
       objectReference: {fileID: 0}
     - target: {fileID: 3753742920196742577, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.92387956
+      value: 0.9956437
       objectReference: {fileID: 0}
     - target: {fileID: 3753742920196742577, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.3826835
+      value: 0.09324047
       objectReference: {fileID: 0}
     - target: {fileID: 3753742920196742577, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.000000042146855
+      value: 0.000000011608875
       objectReference: {fileID: 0}
     - target: {fileID: 3753742920196742577, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.000000042146848
+      value: -0.0000000010871529
       objectReference: {fileID: 0}
     - target: {fileID: 3753742920196742577, guid: f57ab4f257f30514fb111e7a099f9909, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1491,7 +1536,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 60.000004
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -1517,8 +1562,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1777078310}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3826835, y: -0.000000029802333, z: 0.0000000123445325, w: 0.9238795}
-  m_LocalPosition: {x: -69, y: 5.825621, z: -136.42462}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -55, y: 85, z: -54}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

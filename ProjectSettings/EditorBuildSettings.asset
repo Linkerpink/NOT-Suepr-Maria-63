@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Title Screen.unity
+    guid: e515a679464972e4281b263126cb2537
+  - enabled: 1
     path: Assets/Scenes/Peach's Castle Outside Front.unity
     guid: 4ca2643145bdb7c4dae351e20862d8a7
   - enabled: 1
